@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{D3672177-FADF-44CB-8B79-4E825EC4C56B}</ProjectGuid>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <Keyword>ManagedCProj</Keyword>
+    <RootNamespace>coursework</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\Banknote.cpp" />
+    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\BanknoteCollection.cpp" />
+    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\Currency.cpp" />
+    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyFileService.cpp" />
+    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyReportBuilder.cpp" />
+    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyRepository.cpp" />
+    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencySorter.cpp" />
+    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\MyForm.cpp" />
+    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\StringBridge.cpp" />
+    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\TextFileReader.cpp" />
+    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\TextFileWriter.cpp" />
+    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\ValueParser.cpp" />
+    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\WideString.cpp" />
+    <ClCompile Include="MyForm.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\Banknote.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\BanknoteCollection.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\Currency.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyException.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyFileService.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyReportBuilder.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyRepository.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencySorter.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\DuplicateItemException.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\DynamicArray.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\EndOfFileException.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\FileAccessException.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\IndexRangeException.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\InvalidFormatException.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\InvalidValueException.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\ItemNotFoundException.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\MemoryAllocationException.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\MyForm.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\NotEnoughBanknotesException.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\NumberOverflowException.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\StringBridge.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\TextFileReader.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\TextFileWriter.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\ValueParser.h" />
+    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\WideString.h" />
+    <ClInclude Include="MyForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\sample_currencies.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MyForm.resx">
+      <DependentUpon>MyForm.h</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
