@@ -111,53 +111,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\Banknote.cpp" />
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\BanknoteCollection.cpp" />
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\Currency.cpp" />
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyFileService.cpp" />
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyReportBuilder.cpp" />
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyRepository.cpp" />
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencySorter.cpp" />
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\MyForm.cpp" />
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\StringBridge.cpp" />
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\TextFileReader.cpp" />
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\TextFileWriter.cpp" />
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\ValueParser.cpp" />
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\WideString.cpp" />
+    <ClCompile Include="Currency.cpp" />
+    <ClCompile Include="Currencycatalog.cpp" />
     <ClCompile Include="MyForm.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\Banknote.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\BanknoteCollection.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\Currency.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyException.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyFileService.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyReportBuilder.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyRepository.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencySorter.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\DuplicateItemException.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\DynamicArray.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\EndOfFileException.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\FileAccessException.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\IndexRangeException.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\InvalidFormatException.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\InvalidValueException.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\ItemNotFoundException.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\MemoryAllocationException.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\MyForm.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\NotEnoughBanknotesException.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\NumberOverflowException.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\StringBridge.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\TextFileReader.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\TextFileWriter.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\ValueParser.h" />
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\WideString.h" />
+    <ClInclude Include="Chartform.h" />
+    <ClInclude Include="Currency.h" />
+    <ClInclude Include="Currencycatalog.h" />
+    <ClInclude Include="Currencyexception.h" />
     <ClInclude Include="MyForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\sample_currencies.txt" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

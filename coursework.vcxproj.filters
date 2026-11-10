@@ -15,130 +15,31 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\Banknote.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\BanknoteCollection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\Currency.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyFileService.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyReportBuilder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyRepository.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencySorter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\MyForm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\StringBridge.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\TextFileReader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\TextFileWriter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\ValueParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\WideString.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MyForm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Currency.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Currencycatalog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\Banknote.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\BanknoteCollection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\Currency.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyFileService.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyReportBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencyRepository.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\CurrencySorter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\DuplicateItemException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\DynamicArray.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\EndOfFileException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\FileAccessException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\IndexRangeException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\InvalidFormatException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\InvalidValueException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\ItemNotFoundException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\MemoryAllocationException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\MyForm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\NotEnoughBanknotesException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\NumberOverflowException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\StringBridge.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\TextFileReader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\TextFileWriter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\ValueParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\WideString.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MyForm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="C:\Users\User\Downloads\CurrencyApp (1)\CurrencyApp\sample_currencies.txt" />
+    <ClInclude Include="Currency.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Currencycatalog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Currencyexception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chartform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,51 +1,31 @@
-#pragma once
+п»ї#pragma once
 
-#include "CurrencyRepository.h"
-#include "CurrencySorter.h"
-#include "CurrencyReportBuilder.h"
-#include "CurrencyFileService.h"
-#include "ValueParser.h"
-#include "StringBridge.h"
-#include "InvalidFormatException.h"
-#include "InvalidValueException.h"
-#include "NumberOverflowException.h"
-#include "ItemNotFoundException.h"
-#include "DuplicateItemException.h"
-#include "NotEnoughBanknotesException.h"
-#include "IndexRangeException.h"
-#include "MemoryAllocationException.h"
-#include "FileAccessException.h"
+#include "ChartForm.h"
+#include "CurrencyCatalog.h"
+#include "CurrencyException.h"
+
+#include <msclr/marshal_cppstd.h>
 
 namespace coursework {
 
 	using namespace System;
 	using namespace System::ComponentModel;
-	using namespace System::Collections;
-	using namespace System::Windows::Forms;
-	using namespace System::Data;
 	using namespace System::Drawing;
-	using namespace CurrencyApp;
+	using namespace System::Globalization;
+	using namespace System::Windows::Forms;
 
-	/// <summary>
-	/// Головне вікно програми «Облік валют» (Windows Forms, українською).
-	/// Форма в C++/CLI має бути керованим класом (ref) — цього вимагає Windows Forms;
-	/// уся модель даних (валюти, банкноти, файли, сортування) — звичайні класи C++ без STL.
-	/// </summary>
 	public ref class MyForm : public System::Windows::Forms::Form
 	{
 	public:
 		MyForm(void)
 		{
 			InitializeComponent();
-			repository = new CurrencyRepository();
-			shown = new DynamicArray<int>();
-			ShowAll();
+			catalog = new CurrencyCatalog();
+			RefreshGrid(catalog->GetAll());
+			SetStatus(L"Р“РѕС‚РѕРІРѕ. Р”РѕРґР°Р№С‚Рµ РІР°Р»СЋС‚Сѓ Р°Р±Рѕ РІС–РґРєСЂРёР№С‚Рµ С„Р°Р№Р» (Ctrl+O).");
 		}
 
 	protected:
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
 		~MyForm()
 		{
 			if (components)
@@ -55,120 +35,115 @@ namespace coursework {
 			this->!MyForm();
 		}
 
-		/// <summary>Звільнення власних (нативних) об'єктів.</summary>
 		!MyForm()
 		{
-			delete shown;
-			shown = nullptr;
-			delete repository;
-			repository = nullptr;
+			delete catalog;
+			catalog = nullptr;
 		}
 
 	private:
-		// ---------- Дані (власні класи, без STL) ----------
-		CurrencyRepository* repository;   // усі валюти
-		DynamicArray<int>* shown;         // індекси валют, показаних у таблиці (усі / пошук / фільтр)
+		CurrencyCatalog* catalog;
 
-		// ---------- Елементи керування (створюються в InitializeComponent) ----------
-		System::Windows::Forms::TabControl^ tabs;
-		System::Windows::Forms::TabPage^ tabCurrencies;
-		System::Windows::Forms::TabPage^ tabReports;
-		System::Windows::Forms::DataGridViewTextBoxColumn^ colName;
-		System::Windows::Forms::DataGridViewTextBoxColumn^ colCountry;
-		System::Windows::Forms::DataGridViewTextBoxColumn^ colRate;
-		System::Windows::Forms::DataGridViewTextBoxColumn^ colDollar;
-		System::Windows::Forms::DataGridViewTextBoxColumn^ colNotes;
-		System::Windows::Forms::DataGridView^ grid;
-		System::Windows::Forms::GroupBox^ grpNotes;
-		System::Windows::Forms::Label^ lblDenomination;
-		System::Windows::Forms::TextBox^ txtDenomination;
-		System::Windows::Forms::Label^ lblQuantity;
-		System::Windows::Forms::TextBox^ txtQuantity;
-		System::Windows::Forms::Button^ btnAddNotes;
-		System::Windows::Forms::Button^ btnRemoveNotes;
-		System::Windows::Forms::CheckBox^ chkDescending;
-		System::Windows::Forms::Button^ btnSort;
-		System::Windows::Forms::GroupBox^ grpSearch;
-		System::Windows::Forms::Label^ lblSearch;
-		System::Windows::Forms::TextBox^ txtSearch;
-		System::Windows::Forms::Button^ btnSearch;
-		System::Windows::Forms::Label^ lblFrom;
-		System::Windows::Forms::TextBox^ txtFrom;
-		System::Windows::Forms::Label^ lblTo;
-		System::Windows::Forms::TextBox^ txtTo;
-		System::Windows::Forms::Button^ btnFilter;
-		System::Windows::Forms::Button^ btnShowAll;
-		System::Windows::Forms::GroupBox^ grpInput;
-		System::Windows::Forms::Label^ lblName;
-		System::Windows::Forms::TextBox^ txtName;
-		System::Windows::Forms::Label^ lblCountry;
-		System::Windows::Forms::TextBox^ txtCountry;
-		System::Windows::Forms::Label^ lblRate;
-		System::Windows::Forms::TextBox^ txtRate;
-		System::Windows::Forms::Label^ lblDollar;
-		System::Windows::Forms::TextBox^ txtDollar;
-		System::Windows::Forms::Label^ lblNotes;
-		System::Windows::Forms::TextBox^ txtNotes;
-		System::Windows::Forms::Button^ btnAddCurrency;
-		System::Windows::Forms::TextBox^ txtReport;
-		System::Windows::Forms::Panel^ panelReports;
-		System::Windows::Forms::Button^ btnReportCountries;
-		System::Windows::Forms::Button^ btnReportDollars;
-		System::Windows::Forms::StatusStrip^ statusStrip;
-		System::Windows::Forms::ToolStripStatusLabel^ statusLabel;
-		System::Windows::Forms::ToolStrip^ toolStrip;
-		System::Windows::Forms::ToolStripButton^ tbOpen;
-		System::Windows::Forms::ToolStripButton^ tbSave;
-		System::Windows::Forms::ToolStripSeparator^ tsSep1;
-		System::Windows::Forms::ToolStripButton^ tbAddCurrency;
-		System::Windows::Forms::ToolStripButton^ tbRemoveCurrency;
-		System::Windows::Forms::ToolStripSeparator^ tsSep2;
-		System::Windows::Forms::ToolStripButton^ tbSearch;
-		System::Windows::Forms::ToolStripButton^ tbFilter;
-		System::Windows::Forms::ToolStripButton^ tbShowAll;
-		System::Windows::Forms::ToolStripSeparator^ tsSep3;
-		System::Windows::Forms::ToolStripButton^ tbAddNotes;
-		System::Windows::Forms::ToolStripButton^ tbRemoveNotes;
-		System::Windows::Forms::ToolStripSeparator^ tsSep4;
-		System::Windows::Forms::ToolStripButton^ tbSort;
-		System::Windows::Forms::ToolStripButton^ tbReportCountries;
-		System::Windows::Forms::ToolStripButton^ tbReportDollars;
-		System::Windows::Forms::MenuStrip^ menuStrip;
-		System::Windows::Forms::ToolStripMenuItem^ miFile;
-		System::Windows::Forms::ToolStripMenuItem^ miNew;
-		System::Windows::Forms::ToolStripMenuItem^ miOpen;
-		System::Windows::Forms::ToolStripMenuItem^ miSave;
-		System::Windows::Forms::ToolStripSeparator^ sepFile;
-		System::Windows::Forms::ToolStripMenuItem^ miExit;
-		System::Windows::Forms::ToolStripMenuItem^ miCurrencies;
-		System::Windows::Forms::ToolStripMenuItem^ miAddCurrency;
-		System::Windows::Forms::ToolStripMenuItem^ miRemoveCurrency;
-		System::Windows::Forms::ToolStripSeparator^ sepCurrencies;
-		System::Windows::Forms::ToolStripMenuItem^ miSearch;
-		System::Windows::Forms::ToolStripMenuItem^ miFilter;
-		System::Windows::Forms::ToolStripMenuItem^ miShowAll;
-		System::Windows::Forms::ToolStripMenuItem^ miNotes;
-		System::Windows::Forms::ToolStripMenuItem^ miAddNotes;
-		System::Windows::Forms::ToolStripMenuItem^ miRemoveNotes;
-		System::Windows::Forms::ToolStripMenuItem^ miReports;
-		System::Windows::Forms::ToolStripMenuItem^ miSort;
-		System::Windows::Forms::ToolStripMenuItem^ miReportCountries;
-		System::Windows::Forms::ToolStripMenuItem^ miReportDollars;
-		System::Windows::Forms::ToolStripMenuItem^ miHelp;
-		System::Windows::Forms::ToolStripMenuItem^ miFileFormat;
-		System::Windows::Forms::ToolStripMenuItem^ miAbout;
-		System::Windows::Forms::ContextMenuStrip^ gridMenu;
-		System::Windows::Forms::ToolStripMenuItem^ cmAddNotes;
-		System::Windows::Forms::ToolStripMenuItem^ cmRemoveNotes;
-		System::Windows::Forms::ToolStripSeparator^ cmSep;
-		System::Windows::Forms::ToolStripMenuItem^ cmRemoveCurrency;
-		System::Windows::Forms::ToolStripMenuItem^ cmShowAll;
-		System::Windows::Forms::ToolTip^ toolTip;
+	private: System::Windows::Forms::Label^ lblName;
+	private: System::Windows::Forms::TextBox^ txtName;
+	private: System::Windows::Forms::Label^ lblCountry;
+	private: System::Windows::Forms::TextBox^ txtCountry;
+	private: System::Windows::Forms::Label^ lblRate;
+	private: System::Windows::Forms::TextBox^ txtRate;
+	private: System::Windows::Forms::Label^ lblRatio;
+	private: System::Windows::Forms::TextBox^ txtRatio;
+	private: System::Windows::Forms::Button^ btnAdd;
+	private: System::Windows::Forms::GroupBox^ groupNew;
+	private: System::Windows::Forms::Label^ lblSearch;
+	private: System::Windows::Forms::TextBox^ txtSearch;
+	private: System::Windows::Forms::Button^ btnSearch;
+	private: System::Windows::Forms::Label^ lblFrom;
+	private: System::Windows::Forms::TextBox^ txtFrom;
+	private: System::Windows::Forms::Label^ lblTo;
+	private: System::Windows::Forms::TextBox^ txtTo;
+	private: System::Windows::Forms::Button^ btnFilter;
+	private: System::Windows::Forms::Button^ btnShowAll;
+	private: System::Windows::Forms::GroupBox^ groupSearch;
+	private: System::Windows::Forms::Label^ lblDenomination;
+	private: System::Windows::Forms::TextBox^ txtDenomination;
+	private: System::Windows::Forms::Label^ lblQuantity;
+	private: System::Windows::Forms::TextBox^ txtQuantity;
+	private: System::Windows::Forms::Button^ btnAddNotes;
+	private: System::Windows::Forms::Button^ btnRemoveNotes;
+	private: System::Windows::Forms::GroupBox^ groupNotes;
+	private: System::Windows::Forms::Button^ btnSort;
+	private: System::Windows::Forms::Button^ btnCountries;
+	private: System::Windows::Forms::Button^ btnDollars;
+	private: System::Windows::Forms::Button^ btnChart;
+	private: System::Windows::Forms::GroupBox^ groupCalc;
+	private: System::Windows::Forms::Panel^ panelLeft;
+	private: System::Windows::Forms::DataGridViewTextBoxColumn^ colName;
+	private: System::Windows::Forms::DataGridViewTextBoxColumn^ colCountry;
+	private: System::Windows::Forms::DataGridViewTextBoxColumn^ colRate;
+	private: System::Windows::Forms::DataGridViewTextBoxColumn^ colRatio;
+	private: System::Windows::Forms::DataGridViewTextBoxColumn^ colNotes;
+	private: System::Windows::Forms::DataGridView^ grid;
+	private: System::Windows::Forms::TextBox^ txtReport;
+	private: System::Windows::Forms::ToolStripMenuItem^ cmAddNotes;
+	private: System::Windows::Forms::ToolStripMenuItem^ cmRemoveNotes;
+	private: System::Windows::Forms::ToolStripSeparator^ sepCm;
+	private: System::Windows::Forms::ToolStripMenuItem^ cmRemove;
+	private: System::Windows::Forms::ToolStripMenuItem^ cmShowAll;
+	private: System::Windows::Forms::ContextMenuStrip^ gridMenu;
+	private: System::Windows::Forms::ToolStripStatusLabel^ statusLabel;
+	private: System::Windows::Forms::StatusStrip^ statusStrip1;
+	private: System::Windows::Forms::ToolStripButton^ tbOpen;
+	private: System::Windows::Forms::ToolStripButton^ tbSave;
+	private: System::Windows::Forms::ToolStripSeparator^ sepT1;
+	private: System::Windows::Forms::ToolStripButton^ tbAdd;
+	private: System::Windows::Forms::ToolStripButton^ tbRemove;
+	private: System::Windows::Forms::ToolStripSeparator^ sepT2;
+	private: System::Windows::Forms::ToolStripButton^ tbSearch;
+	private: System::Windows::Forms::ToolStripButton^ tbFilter;
+	private: System::Windows::Forms::ToolStripButton^ tbShowAll;
+	private: System::Windows::Forms::ToolStripSeparator^ sepT3;
+	private: System::Windows::Forms::ToolStripButton^ tbAddNotes;
+	private: System::Windows::Forms::ToolStripButton^ tbRemoveNotes;
+	private: System::Windows::Forms::ToolStripSeparator^ sepT4;
+	private: System::Windows::Forms::ToolStripButton^ tbSort;
+	private: System::Windows::Forms::ToolStripButton^ tbCountries;
+	private: System::Windows::Forms::ToolStripButton^ tbDollars;
+	private: System::Windows::Forms::ToolStripButton^ tbChart;
+	private: System::Windows::Forms::ToolStrip^ toolStrip1;
+	private: System::Windows::Forms::ToolStripMenuItem^ miOpen;
+	private: System::Windows::Forms::ToolStripMenuItem^ miSave;
+	private: System::Windows::Forms::ToolStripSeparator^ sepF1;
+	private: System::Windows::Forms::ToolStripMenuItem^ miClear;
+	private: System::Windows::Forms::ToolStripSeparator^ sepF2;
+	private: System::Windows::Forms::ToolStripMenuItem^ miExit;
+	private: System::Windows::Forms::ToolStripMenuItem^ miFile;
+	private: System::Windows::Forms::ToolStripMenuItem^ miAdd;
+	private: System::Windows::Forms::ToolStripMenuItem^ miRemove;
+	private: System::Windows::Forms::ToolStripSeparator^ sepC1;
+	private: System::Windows::Forms::ToolStripMenuItem^ miSearch;
+	private: System::Windows::Forms::ToolStripMenuItem^ miFilter;
+	private: System::Windows::Forms::ToolStripMenuItem^ miShowAll;
+	private: System::Windows::Forms::ToolStripMenuItem^ miCurrency;
+	private: System::Windows::Forms::ToolStripMenuItem^ miAddNotes;
+	private: System::Windows::Forms::ToolStripMenuItem^ miRemoveNotes;
+	private: System::Windows::Forms::ToolStripMenuItem^ miNotes;
+	private: System::Windows::Forms::ToolStripMenuItem^ miSort;
+	private: System::Windows::Forms::ToolStripMenuItem^ miCountries;
+	private: System::Windows::Forms::ToolStripMenuItem^ miDollars;
+	private: System::Windows::Forms::ToolStripMenuItem^ miChart;
+	private: System::Windows::Forms::ToolStripMenuItem^ miCalc;
+	private: System::Windows::Forms::ToolStripMenuItem^ miFormat;
+	private: System::Windows::Forms::ToolStripMenuItem^ miAbout;
+	private: System::Windows::Forms::ToolStripMenuItem^ miHelp;
+	private: System::Windows::Forms::MenuStrip^ menuStrip1;
+	private: System::Windows::Forms::ToolTip^ toolTip;
+private: System::ComponentModel::IContainer^ components;
 
+	private:
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		System::ComponentModel::Container^ components;
+
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -178,25 +153,16 @@ namespace coursework {
 		void InitializeComponent(void)
 		{
 			this->components = (gcnew System::ComponentModel::Container());
-			this->tabs = (gcnew System::Windows::Forms::TabControl());
-			this->tabCurrencies = (gcnew System::Windows::Forms::TabPage());
-			this->tabReports = (gcnew System::Windows::Forms::TabPage());
-			this->colName = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
-			this->colCountry = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
-			this->colRate = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
-			this->colDollar = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
-			this->colNotes = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
-			this->grid = (gcnew System::Windows::Forms::DataGridView());
-			this->grpNotes = (gcnew System::Windows::Forms::GroupBox());
-			this->lblDenomination = (gcnew System::Windows::Forms::Label());
-			this->txtDenomination = (gcnew System::Windows::Forms::TextBox());
-			this->lblQuantity = (gcnew System::Windows::Forms::Label());
-			this->txtQuantity = (gcnew System::Windows::Forms::TextBox());
-			this->btnAddNotes = (gcnew System::Windows::Forms::Button());
-			this->btnRemoveNotes = (gcnew System::Windows::Forms::Button());
-			this->chkDescending = (gcnew System::Windows::Forms::CheckBox());
-			this->btnSort = (gcnew System::Windows::Forms::Button());
-			this->grpSearch = (gcnew System::Windows::Forms::GroupBox());
+			this->lblName = (gcnew System::Windows::Forms::Label());
+			this->txtName = (gcnew System::Windows::Forms::TextBox());
+			this->lblCountry = (gcnew System::Windows::Forms::Label());
+			this->txtCountry = (gcnew System::Windows::Forms::TextBox());
+			this->lblRate = (gcnew System::Windows::Forms::Label());
+			this->txtRate = (gcnew System::Windows::Forms::TextBox());
+			this->lblRatio = (gcnew System::Windows::Forms::Label());
+			this->txtRatio = (gcnew System::Windows::Forms::TextBox());
+			this->btnAdd = (gcnew System::Windows::Forms::Button());
+			this->groupNew = (gcnew System::Windows::Forms::GroupBox());
 			this->lblSearch = (gcnew System::Windows::Forms::Label());
 			this->txtSearch = (gcnew System::Windows::Forms::TextBox());
 			this->btnSearch = (gcnew System::Windows::Forms::Button());
@@ -206,1323 +172,1402 @@ namespace coursework {
 			this->txtTo = (gcnew System::Windows::Forms::TextBox());
 			this->btnFilter = (gcnew System::Windows::Forms::Button());
 			this->btnShowAll = (gcnew System::Windows::Forms::Button());
-			this->grpInput = (gcnew System::Windows::Forms::GroupBox());
-			this->lblName = (gcnew System::Windows::Forms::Label());
-			this->txtName = (gcnew System::Windows::Forms::TextBox());
-			this->lblCountry = (gcnew System::Windows::Forms::Label());
-			this->txtCountry = (gcnew System::Windows::Forms::TextBox());
-			this->lblRate = (gcnew System::Windows::Forms::Label());
-			this->txtRate = (gcnew System::Windows::Forms::TextBox());
-			this->lblDollar = (gcnew System::Windows::Forms::Label());
-			this->txtDollar = (gcnew System::Windows::Forms::TextBox());
-			this->lblNotes = (gcnew System::Windows::Forms::Label());
-			this->txtNotes = (gcnew System::Windows::Forms::TextBox());
-			this->btnAddCurrency = (gcnew System::Windows::Forms::Button());
-			this->txtReport = (gcnew System::Windows::Forms::TextBox());
-			this->panelReports = (gcnew System::Windows::Forms::Panel());
-			this->btnReportCountries = (gcnew System::Windows::Forms::Button());
-			this->btnReportDollars = (gcnew System::Windows::Forms::Button());
-			this->statusStrip = (gcnew System::Windows::Forms::StatusStrip());
-			this->statusLabel = (gcnew System::Windows::Forms::ToolStripStatusLabel());
-			this->toolStrip = (gcnew System::Windows::Forms::ToolStrip());
-			this->tbOpen = (gcnew System::Windows::Forms::ToolStripButton());
-			this->tbSave = (gcnew System::Windows::Forms::ToolStripButton());
-			this->tsSep1 = (gcnew System::Windows::Forms::ToolStripSeparator());
-			this->tbAddCurrency = (gcnew System::Windows::Forms::ToolStripButton());
-			this->tbRemoveCurrency = (gcnew System::Windows::Forms::ToolStripButton());
-			this->tsSep2 = (gcnew System::Windows::Forms::ToolStripSeparator());
-			this->tbSearch = (gcnew System::Windows::Forms::ToolStripButton());
-			this->tbFilter = (gcnew System::Windows::Forms::ToolStripButton());
-			this->tbShowAll = (gcnew System::Windows::Forms::ToolStripButton());
-			this->tsSep3 = (gcnew System::Windows::Forms::ToolStripSeparator());
-			this->tbAddNotes = (gcnew System::Windows::Forms::ToolStripButton());
-			this->tbRemoveNotes = (gcnew System::Windows::Forms::ToolStripButton());
-			this->tsSep4 = (gcnew System::Windows::Forms::ToolStripSeparator());
-			this->tbSort = (gcnew System::Windows::Forms::ToolStripButton());
-			this->tbReportCountries = (gcnew System::Windows::Forms::ToolStripButton());
-			this->tbReportDollars = (gcnew System::Windows::Forms::ToolStripButton());
-			this->menuStrip = (gcnew System::Windows::Forms::MenuStrip());
-			this->miFile = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miNew = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miOpen = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miSave = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->sepFile = (gcnew System::Windows::Forms::ToolStripSeparator());
-			this->miExit = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miCurrencies = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miAddCurrency = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miRemoveCurrency = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->sepCurrencies = (gcnew System::Windows::Forms::ToolStripSeparator());
-			this->miSearch = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miFilter = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miShowAll = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miNotes = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miAddNotes = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miRemoveNotes = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miReports = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miSort = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miReportCountries = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miReportDollars = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miHelp = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miFileFormat = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->miAbout = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->groupSearch = (gcnew System::Windows::Forms::GroupBox());
+			this->lblDenomination = (gcnew System::Windows::Forms::Label());
+			this->txtDenomination = (gcnew System::Windows::Forms::TextBox());
+			this->lblQuantity = (gcnew System::Windows::Forms::Label());
+			this->txtQuantity = (gcnew System::Windows::Forms::TextBox());
+			this->btnAddNotes = (gcnew System::Windows::Forms::Button());
+			this->btnRemoveNotes = (gcnew System::Windows::Forms::Button());
+			this->groupNotes = (gcnew System::Windows::Forms::GroupBox());
+			this->btnSort = (gcnew System::Windows::Forms::Button());
+			this->btnCountries = (gcnew System::Windows::Forms::Button());
+			this->btnDollars = (gcnew System::Windows::Forms::Button());
+			this->btnChart = (gcnew System::Windows::Forms::Button());
+			this->groupCalc = (gcnew System::Windows::Forms::GroupBox());
+			this->panelLeft = (gcnew System::Windows::Forms::Panel());
+			this->colName = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
+			this->colCountry = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
+			this->colRate = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
+			this->colRatio = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
+			this->colNotes = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
+			this->grid = (gcnew System::Windows::Forms::DataGridView());
 			this->gridMenu = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
 			this->cmAddNotes = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->cmRemoveNotes = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->cmSep = (gcnew System::Windows::Forms::ToolStripSeparator());
-			this->cmRemoveCurrency = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->sepCm = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->cmRemove = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->cmShowAll = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->txtReport = (gcnew System::Windows::Forms::TextBox());
+			this->statusLabel = (gcnew System::Windows::Forms::ToolStripStatusLabel());
+			this->statusStrip1 = (gcnew System::Windows::Forms::StatusStrip());
+			this->tbOpen = (gcnew System::Windows::Forms::ToolStripButton());
+			this->tbSave = (gcnew System::Windows::Forms::ToolStripButton());
+			this->sepT1 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->tbAdd = (gcnew System::Windows::Forms::ToolStripButton());
+			this->tbRemove = (gcnew System::Windows::Forms::ToolStripButton());
+			this->sepT2 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->tbSearch = (gcnew System::Windows::Forms::ToolStripButton());
+			this->tbFilter = (gcnew System::Windows::Forms::ToolStripButton());
+			this->tbShowAll = (gcnew System::Windows::Forms::ToolStripButton());
+			this->sepT3 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->tbAddNotes = (gcnew System::Windows::Forms::ToolStripButton());
+			this->tbRemoveNotes = (gcnew System::Windows::Forms::ToolStripButton());
+			this->sepT4 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->tbSort = (gcnew System::Windows::Forms::ToolStripButton());
+			this->tbCountries = (gcnew System::Windows::Forms::ToolStripButton());
+			this->tbDollars = (gcnew System::Windows::Forms::ToolStripButton());
+			this->tbChart = (gcnew System::Windows::Forms::ToolStripButton());
+			this->toolStrip1 = (gcnew System::Windows::Forms::ToolStrip());
+			this->miOpen = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miSave = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->sepF1 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->miClear = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->sepF2 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->miExit = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miFile = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miAdd = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miRemove = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->sepC1 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->miSearch = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miFilter = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miShowAll = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miCurrency = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miAddNotes = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miRemoveNotes = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miNotes = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miSort = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miCountries = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miDollars = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miChart = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miCalc = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miFormat = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miAbout = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->miHelp = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->menuStrip1 = (gcnew System::Windows::Forms::MenuStrip());
 			this->toolTip = (gcnew System::Windows::Forms::ToolTip(this->components));
+			this->groupNew->SuspendLayout();
+			this->groupSearch->SuspendLayout();
+			this->groupNotes->SuspendLayout();
+			this->groupCalc->SuspendLayout();
+			this->panelLeft->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->grid))->BeginInit();
-			this->menuStrip->SuspendLayout();
-			this->toolStrip->SuspendLayout();
-			this->statusStrip->SuspendLayout();
 			this->gridMenu->SuspendLayout();
-			this->tabs->SuspendLayout();
-			this->tabCurrencies->SuspendLayout();
-			this->tabReports->SuspendLayout();
-			this->grpInput->SuspendLayout();
-			this->grpSearch->SuspendLayout();
-			this->grpNotes->SuspendLayout();
-			this->panelReports->SuspendLayout();
+			this->statusStrip1->SuspendLayout();
+			this->toolStrip1->SuspendLayout();
+			this->menuStrip1->SuspendLayout();
 			this->SuspendLayout();
 			// 
-			// tabs
+			// lblName
 			// 
-			this->tabs->Controls->Add(this->tabCurrencies);
-			this->tabs->Controls->Add(this->tabReports);
-			this->tabs->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->tabs->Location = System::Drawing::Point(0, 52);
-			this->tabs->Name = L"tabs";
-			this->tabs->SelectedIndex = 0;
-			this->tabs->Size = System::Drawing::Size(1100, 600);
-			this->tabs->TabIndex = 0;
+			this->lblName->AutoSize = true;
+			this->lblName->Location = System::Drawing::Point(13, 38);
+			this->lblName->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->lblName->Name = L"lblName";
+			this->lblName->Size = System::Drawing::Size(52, 16);
+			this->lblName->TabIndex = 0;
+			this->lblName->Text = L"РќР°Р·РІР°:";
 			// 
-			// tabCurrencies
+			// txtName
 			// 
-			this->tabCurrencies->Controls->Add(this->grid);
-			this->tabCurrencies->Controls->Add(this->grpNotes);
-			this->tabCurrencies->Controls->Add(this->grpSearch);
-			this->tabCurrencies->Controls->Add(this->grpInput);
-			this->tabCurrencies->Location = System::Drawing::Point(4, 25);
-			this->tabCurrencies->Name = L"tabCurrencies";
-			this->tabCurrencies->Padding = System::Windows::Forms::Padding(3);
-			this->tabCurrencies->Size = System::Drawing::Size(1092, 571);
-			this->tabCurrencies->Text = L"Валюти";
-			this->tabCurrencies->UseVisualStyleBackColor = true;
+			this->txtName->Location = System::Drawing::Point(220, 34);
+			this->txtName->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->txtName->Name = L"txtName";
+			this->txtName->Size = System::Drawing::Size(185, 22);
+			this->txtName->TabIndex = 1;
+			this->toolTip->SetToolTip(this->txtName, L"РќР°Р·РІР° РІР°Р»СЋС‚Рё, РЅР°РїСЂРёРєР»Р°Рґ: Р„РІСЂРѕ. РќР°Р·РІРё РјР°СЋС‚СЊ Р±СѓС‚Рё СѓРЅС–РєР°Р»СЊРЅРёРјРё.");
 			// 
-			// tabReports
+			// lblCountry
 			// 
-			this->tabReports->Controls->Add(this->txtReport);
-			this->tabReports->Controls->Add(this->panelReports);
-			this->tabReports->Location = System::Drawing::Point(4, 25);
-			this->tabReports->Name = L"tabReports";
-			this->tabReports->Padding = System::Windows::Forms::Padding(3);
-			this->tabReports->Size = System::Drawing::Size(1092, 571);
-			this->tabReports->Text = L"Звіти";
-			this->tabReports->UseVisualStyleBackColor = true;
+			this->lblCountry->AutoSize = true;
+			this->lblCountry->Location = System::Drawing::Point(13, 78);
+			this->lblCountry->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->lblCountry->Name = L"lblCountry";
+			this->lblCountry->Size = System::Drawing::Size(53, 16);
+			this->lblCountry->TabIndex = 2;
+			this->lblCountry->Text = L"РљСЂР°С—РЅР°:";
 			// 
-			// colName
+			// txtCountry
 			// 
-			this->colName->HeaderText = L"Назва";
-			this->colName->Name = L"colName";
+			this->txtCountry->Location = System::Drawing::Point(220, 74);
+			this->txtCountry->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->txtCountry->Name = L"txtCountry";
+			this->txtCountry->Size = System::Drawing::Size(185, 22);
+			this->txtCountry->TabIndex = 3;
+			this->toolTip->SetToolTip(this->txtCountry, L"РљСЂР°С—РЅР°, РЅР°РїСЂРёРєР»Р°Рґ: РќС–РјРµС‡С‡РёРЅР°");
 			// 
-			// colCountry
+			// lblRate
 			// 
-			this->colCountry->HeaderText = L"Країна";
-			this->colCountry->Name = L"colCountry";
+			this->lblRate->AutoSize = true;
+			this->lblRate->Location = System::Drawing::Point(13, 117);
+			this->lblRate->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->lblRate->Name = L"lblRate";
+			this->lblRate->Size = System::Drawing::Size(149, 16);
+			this->lblRate->TabIndex = 4;
+			this->lblRate->Text = L"РљСѓСЂСЃ ($ Р·Р° 1 РѕРґРёРЅРёС†СЋ):";
 			// 
-			// colRate
+			// txtRate
 			// 
-			this->colRate->HeaderText = L"Курс";
-			this->colRate->Name = L"colRate";
+			this->txtRate->Location = System::Drawing::Point(220, 113);
+			this->txtRate->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->txtRate->Name = L"txtRate";
+			this->txtRate->Size = System::Drawing::Size(185, 22);
+			this->txtRate->TabIndex = 5;
+			this->toolTip->SetToolTip(this->txtRate, L"РЎРєС–Р»СЊРєРё РґРѕР»Р°СЂС–РІ РєРѕС€С‚СѓС” 1 РѕРґРёРЅРёС†СЏ РІР°Р»СЋС‚Рё. Р”СЂРѕР±РѕРІС– С‡РёСЃР»Р° - С‡РµСЂРµР· РєСЂР°РїРєСѓ, РЅР°РїСЂРёРєР»Р°Рґ "
+				L"1.08");
 			// 
-			// colDollar
+			// lblRatio
 			// 
-			this->colDollar->HeaderText = L"Відношення до долара";
-			this->colDollar->Name = L"colDollar";
+			this->lblRatio->AutoSize = true;
+			this->lblRatio->Location = System::Drawing::Point(13, 156);
+			this->lblRatio->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->lblRatio->Name = L"lblRatio";
+			this->lblRatio->Size = System::Drawing::Size(144, 16);
+			this->lblRatio->TabIndex = 6;
+			this->lblRatio->Text = L"РћРґРёРЅРёС†СЊ Р·Р° 1 $ (С†С–Р»Рµ):";
 			// 
-			// colNotes
+			// txtRatio
 			// 
-			this->colNotes->HeaderText = L"Наявні банкноти";
-			this->colNotes->Name = L"colNotes";
-			this->colNotes->FillWeight = 220;
+			this->txtRatio->Location = System::Drawing::Point(220, 153);
+			this->txtRatio->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->txtRatio->Name = L"txtRatio";
+			this->txtRatio->Size = System::Drawing::Size(185, 22);
+			this->txtRatio->TabIndex = 7;
+			this->toolTip->SetToolTip(this->txtRatio, L"Р’С–РґРЅРѕС€РµРЅРЅСЏ РґРѕ РґРѕР»Р°СЂР°: С†С–Р»Рµ С‡РёСЃР»Рѕ РІС–Рґ 1 РґРѕ 1000000");
 			// 
-			// grid
+			// btnAdd
 			// 
-			this->grid->Columns->AddRange(gcnew cli::array< System::Windows::Forms::DataGridViewColumn^  >(5) { this->colName, this->colCountry, this->colRate, this->colDollar, this->colNotes });
-			this->grid->AllowUserToAddRows = false;
-			this->grid->AllowUserToDeleteRows = false;
-			this->grid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::Fill;
-			this->grid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-			this->grid->ContextMenuStrip = this->gridMenu;
-			this->grid->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->grid->Location = System::Drawing::Point(3, 3);
-			this->grid->MultiSelect = false;
-			this->grid->Name = L"grid";
-			this->grid->ReadOnly = true;
-			this->grid->RowHeadersVisible = false;
-			this->grid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-			this->grid->Size = System::Drawing::Size(1086, 565);
-			this->grid->TabIndex = 0;
-			this->toolTip->SetToolTip(this->grid, L"Таблиця валют. Права кнопка миші — контекстне меню.");
-			this->grid->CellMouseDown += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &MyForm::OnGridCellMouseDown);
+			this->btnAdd->Location = System::Drawing::Point(220, 194);
+			this->btnAdd->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->btnAdd->Name = L"btnAdd";
+			this->btnAdd->Size = System::Drawing::Size(187, 34);
+			this->btnAdd->TabIndex = 8;
+			this->btnAdd->Text = L"Р”РѕРґР°С‚Рё РІР°Р»СЋС‚Сѓ";
+			this->toolTip->SetToolTip(this->btnAdd, L"Р”РѕРґР°С‚Рё РІР°Р»СЋС‚Сѓ РґРѕ СЃРїРёСЃРєСѓ (Ctrl+D)");
+			this->btnAdd->UseVisualStyleBackColor = true;
+			this->btnAdd->Click += gcnew System::EventHandler(this, &MyForm::OnAddCurrency);
 			// 
-			// grpNotes
+			// groupNew
 			// 
-			this->grpNotes->Controls->Add(this->lblDenomination);
-			this->grpNotes->Controls->Add(this->txtDenomination);
-			this->grpNotes->Controls->Add(this->lblQuantity);
-			this->grpNotes->Controls->Add(this->txtQuantity);
-			this->grpNotes->Controls->Add(this->btnAddNotes);
-			this->grpNotes->Controls->Add(this->btnRemoveNotes);
-			this->grpNotes->Controls->Add(this->chkDescending);
-			this->grpNotes->Controls->Add(this->btnSort);
-			this->grpNotes->Dock = System::Windows::Forms::DockStyle::Bottom;
-			this->grpNotes->Location = System::Drawing::Point(3, 493);
-			this->grpNotes->Name = L"grpNotes";
-			this->grpNotes->Size = System::Drawing::Size(1086, 75);
-			this->grpNotes->TabStop = false;
-			this->grpNotes->Text = L"Банкноти вибраної валюти та сортування";
-			this->grpNotes->TabIndex = 1;
-			// 
-			// lblDenomination
-			// 
-			this->lblDenomination->AutoSize = true;
-			this->lblDenomination->Location = System::Drawing::Point(10, 33);
-			this->lblDenomination->Name = L"lblDenomination";
-			this->lblDenomination->Size = System::Drawing::Size(60, 16);
-			this->lblDenomination->Text = L"Номінал:";
-			this->lblDenomination->TabIndex = 0;
-			// 
-			// txtDenomination
-			// 
-			this->txtDenomination->Location = System::Drawing::Point(75, 30);
-			this->txtDenomination->Name = L"txtDenomination";
-			this->txtDenomination->Size = System::Drawing::Size(80, 22);
-			this->txtDenomination->TabIndex = 1;
-			this->toolTip->SetToolTip(this->txtDenomination, L"Номінал банкноти (ціле число > 0)");
-			// 
-			// lblQuantity
-			// 
-			this->lblQuantity->AutoSize = true;
-			this->lblQuantity->Location = System::Drawing::Point(170, 33);
-			this->lblQuantity->Name = L"lblQuantity";
-			this->lblQuantity->Size = System::Drawing::Size(60, 16);
-			this->lblQuantity->Text = L"Кількість:";
-			this->lblQuantity->TabIndex = 2;
-			// 
-			// txtQuantity
-			// 
-			this->txtQuantity->Location = System::Drawing::Point(240, 30);
-			this->txtQuantity->Name = L"txtQuantity";
-			this->txtQuantity->Size = System::Drawing::Size(80, 22);
-			this->txtQuantity->TabIndex = 3;
-			this->toolTip->SetToolTip(this->txtQuantity, L"Кількість банкнот (ціле число > 0)");
-			// 
-			// btnAddNotes
-			// 
-			this->btnAddNotes->Location = System::Drawing::Point(335, 28);
-			this->btnAddNotes->Name = L"btnAddNotes";
-			this->btnAddNotes->Size = System::Drawing::Size(150, 28);
-			this->btnAddNotes->Text = L"Додати банкноти";
-			this->btnAddNotes->UseVisualStyleBackColor = true;
-			this->btnAddNotes->TabIndex = 4;
-			this->toolTip->SetToolTip(this->btnAddNotes, L"Додати банкноти вибраній валюті");
-			this->btnAddNotes->Click += gcnew System::EventHandler(this, &MyForm::OnAddNotes);
-			// 
-			// btnRemoveNotes
-			// 
-			this->btnRemoveNotes->Location = System::Drawing::Point(495, 28);
-			this->btnRemoveNotes->Name = L"btnRemoveNotes";
-			this->btnRemoveNotes->Size = System::Drawing::Size(165, 28);
-			this->btnRemoveNotes->Text = L"Вилучити банкноти";
-			this->btnRemoveNotes->UseVisualStyleBackColor = true;
-			this->btnRemoveNotes->TabIndex = 5;
-			this->toolTip->SetToolTip(this->btnRemoveNotes, L"Вилучити банкноти у вибраної валюти");
-			this->btnRemoveNotes->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveNotes);
-			// 
-			// chkDescending
-			// 
-			this->chkDescending->AutoSize = true;
-			this->chkDescending->Location = System::Drawing::Point(675, 33);
-			this->chkDescending->Name = L"chkDescending";
-			this->chkDescending->Size = System::Drawing::Size(111, 20);
-			this->chkDescending->Text = L"За спаданням";
-			this->chkDescending->UseVisualStyleBackColor = true;
-			this->chkDescending->TabIndex = 6;
-			this->toolTip->SetToolTip(this->chkDescending, L"Сортувати від більшого відношення до долара до меншого");
-			// 
-			// btnSort
-			// 
-			this->btnSort->Location = System::Drawing::Point(790, 28);
-			this->btnSort->Name = L"btnSort";
-			this->btnSort->Size = System::Drawing::Size(260, 28);
-			this->btnSort->Text = L"Сортувати за відношенням до $";
-			this->btnSort->UseVisualStyleBackColor = true;
-			this->btnSort->TabIndex = 7;
-			this->toolTip->SetToolTip(this->btnSort, L"Сортування підрахунком за відношенням до долара");
-			this->btnSort->Click += gcnew System::EventHandler(this, &MyForm::OnSortByDollar);
-			// 
-			// grpSearch
-			// 
-			this->grpSearch->Controls->Add(this->lblSearch);
-			this->grpSearch->Controls->Add(this->txtSearch);
-			this->grpSearch->Controls->Add(this->btnSearch);
-			this->grpSearch->Controls->Add(this->lblFrom);
-			this->grpSearch->Controls->Add(this->txtFrom);
-			this->grpSearch->Controls->Add(this->lblTo);
-			this->grpSearch->Controls->Add(this->txtTo);
-			this->grpSearch->Controls->Add(this->btnFilter);
-			this->grpSearch->Controls->Add(this->btnShowAll);
-			this->grpSearch->Dock = System::Windows::Forms::DockStyle::Top;
-			this->grpSearch->Location = System::Drawing::Point(3, 108);
-			this->grpSearch->Name = L"grpSearch";
-			this->grpSearch->Size = System::Drawing::Size(1086, 70);
-			this->grpSearch->TabStop = false;
-			this->grpSearch->Text = L"Пошук за назвою та фільтр за курсом";
-			this->grpSearch->TabIndex = 2;
+			this->groupNew->Controls->Add(this->lblName);
+			this->groupNew->Controls->Add(this->txtName);
+			this->groupNew->Controls->Add(this->lblCountry);
+			this->groupNew->Controls->Add(this->txtCountry);
+			this->groupNew->Controls->Add(this->lblRate);
+			this->groupNew->Controls->Add(this->txtRate);
+			this->groupNew->Controls->Add(this->lblRatio);
+			this->groupNew->Controls->Add(this->txtRatio);
+			this->groupNew->Controls->Add(this->btnAdd);
+			this->groupNew->Location = System::Drawing::Point(11, 10);
+			this->groupNew->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->groupNew->Name = L"groupNew";
+			this->groupNew->Padding = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->groupNew->Size = System::Drawing::Size(427, 246);
+			this->groupNew->TabIndex = 0;
+			this->groupNew->TabStop = false;
+			this->groupNew->Text = L"1. РќРѕРІР° РІР°Р»СЋС‚Р° (РІРІРµРґРµРЅРЅСЏ Р· РєР»Р°РІС–Р°С‚СѓСЂРё)";
 			// 
 			// lblSearch
 			// 
 			this->lblSearch->AutoSize = true;
-			this->lblSearch->Location = System::Drawing::Point(10, 31);
+			this->lblSearch->Location = System::Drawing::Point(13, 38);
+			this->lblSearch->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->lblSearch->Name = L"lblSearch";
-			this->lblSearch->Size = System::Drawing::Size(60, 16);
-			this->lblSearch->Text = L"Назва:";
+			this->lblSearch->Size = System::Drawing::Size(52, 16);
 			this->lblSearch->TabIndex = 0;
+			this->lblSearch->Text = L"РќР°Р·РІР°:";
 			// 
 			// txtSearch
 			// 
-			this->txtSearch->Location = System::Drawing::Point(60, 28);
+			this->txtSearch->Location = System::Drawing::Point(87, 34);
+			this->txtSearch->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
 			this->txtSearch->Name = L"txtSearch";
-			this->txtSearch->Size = System::Drawing::Size(150, 22);
+			this->txtSearch->Size = System::Drawing::Size(185, 22);
 			this->txtSearch->TabIndex = 1;
-			this->toolTip->SetToolTip(this->txtSearch, L"Назва або її частина (регістр не враховується)");
+			this->toolTip->SetToolTip(this->txtSearch, L"РќР°Р·РІР° РІР°Р»СЋС‚Рё Р°Р±Рѕ С—С— С‡Р°СЃС‚РёРЅР° (СЂРµРіС–СЃС‚СЂ РјР°С” Р·РЅР°С‡РµРЅРЅСЏ)");
 			// 
 			// btnSearch
 			// 
-			this->btnSearch->Location = System::Drawing::Point(220, 26);
+			this->btnSearch->Location = System::Drawing::Point(287, 32);
+			this->btnSearch->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
 			this->btnSearch->Name = L"btnSearch";
-			this->btnSearch->Size = System::Drawing::Size(80, 28);
-			this->btnSearch->Text = L"Знайти";
-			this->btnSearch->UseVisualStyleBackColor = true;
+			this->btnSearch->Size = System::Drawing::Size(120, 34);
 			this->btnSearch->TabIndex = 2;
-			this->toolTip->SetToolTip(this->btnSearch, L"Знайти валюти за назвою");
+			this->btnSearch->Text = L"Р—РЅР°Р№С‚Рё";
+			this->toolTip->SetToolTip(this->btnSearch, L"Р—РЅР°Р№С‚Рё РІР°Р»СЋС‚Сѓ Р·Р° РЅР°Р·РІРѕСЋ (Ctrl+F)");
+			this->btnSearch->UseVisualStyleBackColor = true;
 			this->btnSearch->Click += gcnew System::EventHandler(this, &MyForm::OnSearch);
 			// 
 			// lblFrom
 			// 
 			this->lblFrom->AutoSize = true;
-			this->lblFrom->Location = System::Drawing::Point(330, 31);
+			this->lblFrom->Location = System::Drawing::Point(13, 82);
+			this->lblFrom->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->lblFrom->Name = L"lblFrom";
-			this->lblFrom->Size = System::Drawing::Size(60, 16);
-			this->lblFrom->Text = L"Курс від:";
+			this->lblFrom->Size = System::Drawing::Size(63, 16);
 			this->lblFrom->TabIndex = 3;
+			this->lblFrom->Text = L"РљСѓСЂСЃ РІС–Рґ:";
 			// 
 			// txtFrom
 			// 
-			this->txtFrom->Location = System::Drawing::Point(395, 28);
+			this->txtFrom->Location = System::Drawing::Point(93, 79);
+			this->txtFrom->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
 			this->txtFrom->Name = L"txtFrom";
-			this->txtFrom->Size = System::Drawing::Size(70, 22);
+			this->txtFrom->Size = System::Drawing::Size(79, 22);
 			this->txtFrom->TabIndex = 4;
-			this->toolTip->SetToolTip(this->txtFrom, L"Нижня межа курсу (x)");
+			this->toolTip->SetToolTip(this->txtFrom, L"РќРёР¶РЅСЏ РјРµР¶Р° РєСѓСЂСЃСѓ (x)");
 			// 
 			// lblTo
 			// 
 			this->lblTo->AutoSize = true;
-			this->lblTo->Location = System::Drawing::Point(475, 31);
+			this->lblTo->Location = System::Drawing::Point(184, 82);
+			this->lblTo->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->lblTo->Name = L"lblTo";
-			this->lblTo->Size = System::Drawing::Size(60, 16);
-			this->lblTo->Text = L"до:";
+			this->lblTo->Size = System::Drawing::Size(26, 16);
 			this->lblTo->TabIndex = 5;
+			this->lblTo->Text = L"РґРѕ:";
 			// 
 			// txtTo
 			// 
-			this->txtTo->Location = System::Drawing::Point(505, 28);
+			this->txtTo->Location = System::Drawing::Point(216, 79);
+			this->txtTo->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
 			this->txtTo->Name = L"txtTo";
-			this->txtTo->Size = System::Drawing::Size(70, 22);
+			this->txtTo->Size = System::Drawing::Size(79, 22);
 			this->txtTo->TabIndex = 6;
-			this->toolTip->SetToolTip(this->txtTo, L"Верхня межа курсу (y)");
+			this->toolTip->SetToolTip(this->txtTo, L"Р’РµСЂС…РЅСЏ РјРµР¶Р° РєСѓСЂСЃСѓ (y)");
 			// 
 			// btnFilter
 			// 
-			this->btnFilter->Location = System::Drawing::Point(585, 26);
+			this->btnFilter->Location = System::Drawing::Point(307, 76);
+			this->btnFilter->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
 			this->btnFilter->Name = L"btnFilter";
-			this->btnFilter->Size = System::Drawing::Size(80, 28);
-			this->btnFilter->Text = L"Фільтр";
-			this->btnFilter->UseVisualStyleBackColor = true;
+			this->btnFilter->Size = System::Drawing::Size(100, 34);
 			this->btnFilter->TabIndex = 7;
-			this->toolTip->SetToolTip(this->btnFilter, L"Показати валюти з курсом від x до y");
+			this->btnFilter->Text = L"Р¤С–Р»СЊС‚СЂ";
+			this->toolTip->SetToolTip(this->btnFilter, L"РџРѕРєР°Р·Р°С‚Рё РІР°Р»СЋС‚Рё Р· РєСѓСЂСЃРѕРј РІС–Рґ x РґРѕ y (Ctrl+R)");
+			this->btnFilter->UseVisualStyleBackColor = true;
 			this->btnFilter->Click += gcnew System::EventHandler(this, &MyForm::OnFilterByRate);
 			// 
 			// btnShowAll
 			// 
-			this->btnShowAll->Location = System::Drawing::Point(675, 26);
+			this->btnShowAll->Location = System::Drawing::Point(13, 121);
+			this->btnShowAll->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
 			this->btnShowAll->Name = L"btnShowAll";
-			this->btnShowAll->Size = System::Drawing::Size(120, 28);
-			this->btnShowAll->Text = L"Показати всі";
-			this->btnShowAll->UseVisualStyleBackColor = true;
+			this->btnShowAll->Size = System::Drawing::Size(393, 34);
 			this->btnShowAll->TabIndex = 8;
-			this->toolTip->SetToolTip(this->btnShowAll, L"Скасувати пошук або фільтр");
+			this->btnShowAll->Text = L"РџРѕРєР°Р·Р°С‚Рё РІСЃС–";
+			this->toolTip->SetToolTip(this->btnShowAll, L"РЎРєР°СЃСѓРІР°С‚Рё РїРѕС€СѓРє Р°Р±Рѕ С„С–Р»СЊС‚СЂ (F5)");
+			this->btnShowAll->UseVisualStyleBackColor = true;
 			this->btnShowAll->Click += gcnew System::EventHandler(this, &MyForm::OnShowAll);
 			// 
-			// grpInput
+			// groupSearch
 			// 
-			this->grpInput->Controls->Add(this->lblName);
-			this->grpInput->Controls->Add(this->txtName);
-			this->grpInput->Controls->Add(this->lblCountry);
-			this->grpInput->Controls->Add(this->txtCountry);
-			this->grpInput->Controls->Add(this->lblRate);
-			this->grpInput->Controls->Add(this->txtRate);
-			this->grpInput->Controls->Add(this->lblDollar);
-			this->grpInput->Controls->Add(this->txtDollar);
-			this->grpInput->Controls->Add(this->lblNotes);
-			this->grpInput->Controls->Add(this->txtNotes);
-			this->grpInput->Controls->Add(this->btnAddCurrency);
-			this->grpInput->Dock = System::Windows::Forms::DockStyle::Top;
-			this->grpInput->Location = System::Drawing::Point(3, 3);
-			this->grpInput->Name = L"grpInput";
-			this->grpInput->Size = System::Drawing::Size(1086, 105);
-			this->grpInput->TabStop = false;
-			this->grpInput->Text = L"Нова валюта (введення з клавіатури)";
-			this->grpInput->TabIndex = 3;
+			this->groupSearch->Controls->Add(this->lblSearch);
+			this->groupSearch->Controls->Add(this->txtSearch);
+			this->groupSearch->Controls->Add(this->btnSearch);
+			this->groupSearch->Controls->Add(this->lblFrom);
+			this->groupSearch->Controls->Add(this->txtFrom);
+			this->groupSearch->Controls->Add(this->lblTo);
+			this->groupSearch->Controls->Add(this->txtTo);
+			this->groupSearch->Controls->Add(this->btnFilter);
+			this->groupSearch->Controls->Add(this->btnShowAll);
+			this->groupSearch->Location = System::Drawing::Point(11, 266);
+			this->groupSearch->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->groupSearch->Name = L"groupSearch";
+			this->groupSearch->Padding = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->groupSearch->Size = System::Drawing::Size(427, 172);
+			this->groupSearch->TabIndex = 1;
+			this->groupSearch->TabStop = false;
+			this->groupSearch->Text = L"2. РџРѕС€СѓРє С– С„С–Р»СЊС‚СЂ";
 			// 
-			// lblName
+			// lblDenomination
 			// 
-			this->lblName->AutoSize = true;
-			this->lblName->Location = System::Drawing::Point(10, 31);
-			this->lblName->Name = L"lblName";
-			this->lblName->Size = System::Drawing::Size(60, 16);
-			this->lblName->Text = L"Назва:";
-			this->lblName->TabIndex = 0;
+			this->lblDenomination->AutoSize = true;
+			this->lblDenomination->Location = System::Drawing::Point(13, 41);
+			this->lblDenomination->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->lblDenomination->Name = L"lblDenomination";
+			this->lblDenomination->Size = System::Drawing::Size(64, 16);
+			this->lblDenomination->TabIndex = 0;
+			this->lblDenomination->Text = L"РќРѕРјС–РЅР°Р»:";
 			// 
-			// txtName
+			// txtDenomination
 			// 
-			this->txtName->Location = System::Drawing::Point(60, 28);
-			this->txtName->Name = L"txtName";
-			this->txtName->Size = System::Drawing::Size(150, 22);
-			this->txtName->TabIndex = 1;
-			this->toolTip->SetToolTip(this->txtName, L"Назва валюти, наприклад: Євро");
+			this->txtDenomination->Location = System::Drawing::Point(113, 37);
+			this->txtDenomination->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->txtDenomination->Name = L"txtDenomination";
+			this->txtDenomination->Size = System::Drawing::Size(105, 22);
+			this->txtDenomination->TabIndex = 1;
+			this->toolTip->SetToolTip(this->txtDenomination, L"РќРѕРјС–РЅР°Р» Р±Р°РЅРєРЅРѕС‚Рё (С†С–Р»Рµ С‡РёСЃР»Рѕ Р±С–Р»СЊС€Рµ 0)");
 			// 
-			// lblCountry
+			// lblQuantity
 			// 
-			this->lblCountry->AutoSize = true;
-			this->lblCountry->Location = System::Drawing::Point(225, 31);
-			this->lblCountry->Name = L"lblCountry";
-			this->lblCountry->Size = System::Drawing::Size(60, 16);
-			this->lblCountry->Text = L"Країна:";
-			this->lblCountry->TabIndex = 2;
+			this->lblQuantity->AutoSize = true;
+			this->lblQuantity->Location = System::Drawing::Point(13, 84);
+			this->lblQuantity->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->lblQuantity->Name = L"lblQuantity";
+			this->lblQuantity->Size = System::Drawing::Size(67, 16);
+			this->lblQuantity->TabIndex = 2;
+			this->lblQuantity->Text = L"РљС–Р»СЊРєС–СЃС‚СЊ:";
 			// 
-			// txtCountry
+			// txtQuantity
 			// 
-			this->txtCountry->Location = System::Drawing::Point(280, 28);
-			this->txtCountry->Name = L"txtCountry";
-			this->txtCountry->Size = System::Drawing::Size(150, 22);
-			this->txtCountry->TabIndex = 3;
-			this->toolTip->SetToolTip(this->txtCountry, L"Країна, наприклад: Польща");
+			this->txtQuantity->Location = System::Drawing::Point(113, 80);
+			this->txtQuantity->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->txtQuantity->Name = L"txtQuantity";
+			this->txtQuantity->Size = System::Drawing::Size(105, 22);
+			this->txtQuantity->TabIndex = 3;
+			this->toolTip->SetToolTip(this->txtQuantity, L"РљС–Р»СЊРєС–СЃС‚СЊ Р±Р°РЅРєРЅРѕС‚ (С†С–Р»Рµ С‡РёСЃР»Рѕ Р±С–Р»СЊС€Рµ 0)");
 			// 
-			// lblRate
+			// btnAddNotes
 			// 
-			this->lblRate->AutoSize = true;
-			this->lblRate->Location = System::Drawing::Point(445, 31);
-			this->lblRate->Name = L"lblRate";
-			this->lblRate->Size = System::Drawing::Size(60, 16);
-			this->lblRate->Text = L"Курс:";
-			this->lblRate->TabIndex = 4;
+			this->btnAddNotes->Location = System::Drawing::Point(247, 32);
+			this->btnAddNotes->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->btnAddNotes->Name = L"btnAddNotes";
+			this->btnAddNotes->Size = System::Drawing::Size(160, 34);
+			this->btnAddNotes->TabIndex = 4;
+			this->btnAddNotes->Text = L"Р”РѕРґР°С‚Рё";
+			this->toolTip->SetToolTip(this->btnAddNotes, L"Р”РѕРґР°С‚Рё Р±Р°РЅРєРЅРѕС‚Рё РІРёР±СЂР°РЅС–Р№ РІР°Р»СЋС‚С– (Ctrl+B)");
+			this->btnAddNotes->UseVisualStyleBackColor = true;
+			this->btnAddNotes->Click += gcnew System::EventHandler(this, &MyForm::OnAddBanknotes);
 			// 
-			// txtRate
+			// btnRemoveNotes
 			// 
-			this->txtRate->Location = System::Drawing::Point(490, 28);
-			this->txtRate->Name = L"txtRate";
-			this->txtRate->Size = System::Drawing::Size(80, 22);
-			this->txtRate->TabIndex = 5;
-			this->toolTip->SetToolTip(this->txtRate, L"Вартість 1 одиниці в національній валюті країни");
+			this->btnRemoveNotes->Location = System::Drawing::Point(247, 76);
+			this->btnRemoveNotes->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->btnRemoveNotes->Name = L"btnRemoveNotes";
+			this->btnRemoveNotes->Size = System::Drawing::Size(160, 34);
+			this->btnRemoveNotes->TabIndex = 5;
+			this->btnRemoveNotes->Text = L"Р’РёР»СѓС‡РёС‚Рё";
+			this->toolTip->SetToolTip(this->btnRemoveNotes, L"Р’РёР»СѓС‡РёС‚Рё Р±Р°РЅРєРЅРѕС‚Рё Сѓ РІРёР±СЂР°РЅРѕС— РІР°Р»СЋС‚Рё (Ctrl+Shift+B)");
+			this->btnRemoveNotes->UseVisualStyleBackColor = true;
+			this->btnRemoveNotes->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveBanknotes);
 			// 
-			// lblDollar
+			// groupNotes
 			// 
-			this->lblDollar->AutoSize = true;
-			this->lblDollar->Location = System::Drawing::Point(585, 31);
-			this->lblDollar->Name = L"lblDollar";
-			this->lblDollar->Size = System::Drawing::Size(60, 16);
-			this->lblDollar->Text = L"Відношення до $:";
-			this->lblDollar->TabIndex = 6;
+			this->groupNotes->Controls->Add(this->lblDenomination);
+			this->groupNotes->Controls->Add(this->txtDenomination);
+			this->groupNotes->Controls->Add(this->lblQuantity);
+			this->groupNotes->Controls->Add(this->txtQuantity);
+			this->groupNotes->Controls->Add(this->btnAddNotes);
+			this->groupNotes->Controls->Add(this->btnRemoveNotes);
+			this->groupNotes->Location = System::Drawing::Point(11, 448);
+			this->groupNotes->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->groupNotes->Name = L"groupNotes";
+			this->groupNotes->Padding = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->groupNotes->Size = System::Drawing::Size(427, 135);
+			this->groupNotes->TabIndex = 2;
+			this->groupNotes->TabStop = false;
+			this->groupNotes->Text = L"3. Р‘Р°РЅРєРЅРѕС‚Рё РІРёР±СЂР°РЅРѕС— РІР°Р»СЋС‚Рё";
 			// 
-			// txtDollar
+			// btnSort
 			// 
-			this->txtDollar->Location = System::Drawing::Point(700, 28);
-			this->txtDollar->Name = L"txtDollar";
-			this->txtDollar->Size = System::Drawing::Size(80, 22);
-			this->txtDollar->TabIndex = 7;
-			this->toolTip->SetToolTip(this->txtDollar, L"Скільки доларів США за 1 одиницю цієї валюти");
+			this->btnSort->Location = System::Drawing::Point(13, 30);
+			this->btnSort->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->btnSort->Name = L"btnSort";
+			this->btnSort->Size = System::Drawing::Size(393, 34);
+			this->btnSort->TabIndex = 0;
+			this->btnSort->Text = L"РЎРѕСЂС‚СѓРІР°С‚Рё Р·Р° РІС–РґРЅРѕС€РµРЅРЅСЏРј РґРѕ $";
+			this->toolTip->SetToolTip(this->btnSort, L"РЎРѕСЂС‚СѓРІР°РЅРЅСЏ РјРµС‚РѕРґРѕРј РїС–РґСЂР°С…СѓРЅРєСѓ Р·Р° РІС–РґРЅРѕС€РµРЅРЅСЏРј РґРѕ РґРѕР»Р°СЂР° (F6)");
+			this->btnSort->UseVisualStyleBackColor = true;
+			this->btnSort->Click += gcnew System::EventHandler(this, &MyForm::OnSort);
 			// 
-			// lblNotes
+			// btnCountries
 			// 
-			this->lblNotes->AutoSize = true;
-			this->lblNotes->Location = System::Drawing::Point(10, 66);
-			this->lblNotes->Name = L"lblNotes";
-			this->lblNotes->Size = System::Drawing::Size(60, 16);
-			this->lblNotes->Text = L"Банкноти (номінал:кількість;…):";
-			this->lblNotes->TabIndex = 8;
+			this->btnCountries->Location = System::Drawing::Point(13, 71);
+			this->btnCountries->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->btnCountries->Name = L"btnCountries";
+			this->btnCountries->Size = System::Drawing::Size(393, 34);
+			this->btnCountries->TabIndex = 1;
+			this->btnCountries->Text = L"Р’Р°Р»СЋС‚Рё Р·Р° РєСЂР°С—РЅР°РјРё";
+			this->toolTip->SetToolTip(this->btnCountries, L"РљСЂР°С—РЅРё Р·Р° Р°Р»С„Р°РІС–С‚РѕРј; РґР»СЏ РєРѕР¶РЅРѕС— - РІР°Р»СЋС‚Рё С‚Р° РЅР°СЏРІРЅС– Р±Р°РЅРєРЅРѕС‚Рё (F7)");
+			this->btnCountries->UseVisualStyleBackColor = true;
+			this->btnCountries->Click += gcnew System::EventHandler(this, &MyForm::OnReportCountries);
 			// 
-			// txtNotes
+			// btnDollars
 			// 
-			this->txtNotes->Location = System::Drawing::Point(215, 63);
-			this->txtNotes->Name = L"txtNotes";
-			this->txtNotes->Size = System::Drawing::Size(365, 22);
-			this->txtNotes->TabIndex = 9;
-			this->toolTip->SetToolTip(this->txtNotes, L"Необов'язково. Приклад: 5:10;20:3;100:7");
+			this->btnDollars->Location = System::Drawing::Point(13, 113);
+			this->btnDollars->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->btnDollars->Name = L"btnDollars";
+			this->btnDollars->Size = System::Drawing::Size(393, 34);
+			this->btnDollars->TabIndex = 2;
+			this->btnDollars->Text = L"РЎСѓРјРё Р±Р°РЅРєРЅРѕС‚ Сѓ РґРѕР»Р°СЂР°С…";
+			this->toolTip->SetToolTip(this->btnDollars, L"РџРµСЂРµРІРµРґРµРЅРЅСЏ Р±Р°РЅРєРЅРѕС‚ Сѓ РґРѕР»Р°СЂРё С‚Р° Р·Р°РіР°Р»СЊРЅР° СЃСѓРјР° РґР»СЏ РєРѕР¶РЅРѕС— РєСЂР°С—РЅРё (F8)");
+			this->btnDollars->UseVisualStyleBackColor = true;
+			this->btnDollars->Click += gcnew System::EventHandler(this, &MyForm::OnReportDollars);
 			// 
-			// btnAddCurrency
+			// btnChart
 			// 
-			this->btnAddCurrency->Location = System::Drawing::Point(600, 60);
-			this->btnAddCurrency->Name = L"btnAddCurrency";
-			this->btnAddCurrency->Size = System::Drawing::Size(140, 28);
-			this->btnAddCurrency->Text = L"Додати валюту";
-			this->btnAddCurrency->UseVisualStyleBackColor = true;
-			this->btnAddCurrency->TabIndex = 10;
-			this->toolTip->SetToolTip(this->btnAddCurrency, L"Додати валюту з полів введення");
-			this->btnAddCurrency->Click += gcnew System::EventHandler(this, &MyForm::OnAddCurrency);
+			this->btnChart->Location = System::Drawing::Point(13, 155);
+			this->btnChart->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->btnChart->Name = L"btnChart";
+			this->btnChart->Size = System::Drawing::Size(393, 34);
+			this->btnChart->TabIndex = 3;
+			this->btnChart->Text = L"Р”С–Р°РіСЂР°РјР° СЃСѓРј Р·Р° РєСЂР°С—РЅР°РјРё";
+			this->toolTip->SetToolTip(this->btnChart, L"Р’С–Р·СѓР°Р»СЊРЅР° РґС–Р°РіСЂР°РјР° СЃСѓРј Сѓ РґРѕР»Р°СЂР°С… (F9)");
+			this->btnChart->UseVisualStyleBackColor = true;
+			this->btnChart->Click += gcnew System::EventHandler(this, &MyForm::OnShowChart);
+			// 
+			// groupCalc
+			// 
+			this->groupCalc->Controls->Add(this->btnSort);
+			this->groupCalc->Controls->Add(this->btnCountries);
+			this->groupCalc->Controls->Add(this->btnDollars);
+			this->groupCalc->Controls->Add(this->btnChart);
+			this->groupCalc->Location = System::Drawing::Point(11, 593);
+			this->groupCalc->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->groupCalc->Name = L"groupCalc";
+			this->groupCalc->Padding = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->groupCalc->Size = System::Drawing::Size(427, 209);
+			this->groupCalc->TabIndex = 3;
+			this->groupCalc->TabStop = false;
+			this->groupCalc->Text = L"4. РћР±С‡РёСЃР»РµРЅРЅСЏ С‚Р° Р·РІС–С‚Рё";
+			// 
+			// panelLeft
+			// 
+			this->panelLeft->AutoScroll = true;
+			this->panelLeft->Controls->Add(this->groupNew);
+			this->panelLeft->Controls->Add(this->groupSearch);
+			this->panelLeft->Controls->Add(this->groupNotes);
+			this->panelLeft->Controls->Add(this->groupCalc);
+			this->panelLeft->Dock = System::Windows::Forms::DockStyle::Left;
+			this->panelLeft->Location = System::Drawing::Point(0, 55);
+			this->panelLeft->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->panelLeft->Name = L"panelLeft";
+			this->panelLeft->Size = System::Drawing::Size(453, 781);
+			this->panelLeft->TabIndex = 2;
+			// 
+			// colName
+			// 
+			this->colName->HeaderText = L"РќР°Р·РІР°";
+			this->colName->MinimumWidth = 6;
+			this->colName->Name = L"colName";
+			this->colName->ReadOnly = true;
+			this->colName->SortMode = System::Windows::Forms::DataGridViewColumnSortMode::NotSortable;
+			// 
+			// colCountry
+			// 
+			this->colCountry->HeaderText = L"РљСЂР°С—РЅР°";
+			this->colCountry->MinimumWidth = 6;
+			this->colCountry->Name = L"colCountry";
+			this->colCountry->ReadOnly = true;
+			this->colCountry->SortMode = System::Windows::Forms::DataGridViewColumnSortMode::NotSortable;
+			// 
+			// colRate
+			// 
+			this->colRate->HeaderText = L"РљСѓСЂСЃ ($ Р·Р° 1 РѕРґРёРЅРёС†СЋ)";
+			this->colRate->MinimumWidth = 6;
+			this->colRate->Name = L"colRate";
+			this->colRate->ReadOnly = true;
+			this->colRate->SortMode = System::Windows::Forms::DataGridViewColumnSortMode::NotSortable;
+			// 
+			// colRatio
+			// 
+			this->colRatio->HeaderText = L"РћРґРёРЅРёС†СЊ Р·Р° 1 $";
+			this->colRatio->MinimumWidth = 6;
+			this->colRatio->Name = L"colRatio";
+			this->colRatio->ReadOnly = true;
+			this->colRatio->SortMode = System::Windows::Forms::DataGridViewColumnSortMode::NotSortable;
+			// 
+			// colNotes
+			// 
+			this->colNotes->FillWeight = 200;
+			this->colNotes->HeaderText = L"РќР°СЏРІРЅС– Р±Р°РЅРєРЅРѕС‚Рё (РЅРѕРјС–РЅР°Р» x РєС–Р»СЊРєС–СЃС‚СЊ)";
+			this->colNotes->MinimumWidth = 6;
+			this->colNotes->Name = L"colNotes";
+			this->colNotes->ReadOnly = true;
+			this->colNotes->SortMode = System::Windows::Forms::DataGridViewColumnSortMode::NotSortable;
+			// 
+			// grid
+			// 
+			this->grid->AllowUserToAddRows = false;
+			this->grid->AllowUserToDeleteRows = false;
+			this->grid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::Fill;
+			this->grid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
+			this->grid->Columns->AddRange(gcnew cli::array< System::Windows::Forms::DataGridViewColumn^  >(5) {
+				this->colName, this->colCountry,
+					this->colRate, this->colRatio, this->colNotes
+			});
+			this->grid->ContextMenuStrip = this->gridMenu;
+			this->grid->Dock = System::Windows::Forms::DockStyle::Fill;
+			this->grid->Location = System::Drawing::Point(453, 55);
+			this->grid->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->grid->MultiSelect = false;
+			this->grid->Name = L"grid";
+			this->grid->ReadOnly = true;
+			this->grid->RowHeadersVisible = false;
+			this->grid->RowHeadersWidth = 51;
+			this->grid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+			this->grid->Size = System::Drawing::Size(1120, 548);
+			this->grid->TabIndex = 0;
+			this->toolTip->SetToolTip(this->grid, L"РўР°Р±Р»РёС†СЏ РІР°Р»СЋС‚. РџСЂР°РІР° РєРЅРѕРїРєР° РјРёС€С– - РєРѕРЅС‚РµРєСЃС‚РЅРµ РјРµРЅСЋ.");
+			this->grid->CellMouseDown += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &MyForm::OnGridCellMouseDown);
+			// 
+			// gridMenu
+			// 
+			this->gridMenu->ImageScalingSize = System::Drawing::Size(20, 20);
+			this->gridMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) {
+				this->cmAddNotes, this->cmRemoveNotes,
+					this->sepCm, this->cmRemove, this->cmShowAll
+			});
+			this->gridMenu->Name = L"gridMenu";
+			this->gridMenu->Size = System::Drawing::Size(214, 106);
+			// 
+			// cmAddNotes
+			// 
+			this->cmAddNotes->Name = L"cmAddNotes";
+			this->cmAddNotes->Size = System::Drawing::Size(213, 24);
+			this->cmAddNotes->Text = L"Р”РѕРґР°С‚Рё Р±Р°РЅРєРЅРѕС‚Рё";
+			this->cmAddNotes->ToolTipText = L"Р”РѕРґР°С‚Рё Р±Р°РЅРєРЅРѕС‚Рё РІРёР±СЂР°РЅС–Р№ РІР°Р»СЋС‚С– (РЅРѕРјС–РЅР°Р» С– РєС–Р»СЊРєС–СЃС‚СЊ Р±РµСЂСѓС‚СЊСЃСЏ Р· Р»С–РІРѕС— РїР°РЅРµР»С–)";
+			this->cmAddNotes->Click += gcnew System::EventHandler(this, &MyForm::OnAddBanknotes);
+			// 
+			// cmRemoveNotes
+			// 
+			this->cmRemoveNotes->Name = L"cmRemoveNotes";
+			this->cmRemoveNotes->Size = System::Drawing::Size(213, 24);
+			this->cmRemoveNotes->Text = L"Р’РёР»СѓС‡РёС‚Рё Р±Р°РЅРєРЅРѕС‚Рё";
+			this->cmRemoveNotes->ToolTipText = L"Р’РёР»СѓС‡РёС‚Рё Р±Р°РЅРєРЅРѕС‚Рё Сѓ РІРёР±СЂР°РЅРѕС— РІР°Р»СЋС‚Рё";
+			this->cmRemoveNotes->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveBanknotes);
+			// 
+			// sepCm
+			// 
+			this->sepCm->Name = L"sepCm";
+			this->sepCm->Size = System::Drawing::Size(210, 6);
+			// 
+			// cmRemove
+			// 
+			this->cmRemove->Name = L"cmRemove";
+			this->cmRemove->Size = System::Drawing::Size(213, 24);
+			this->cmRemove->Text = L"Р’РёРґР°Р»РёС‚Рё РІР°Р»СЋС‚Сѓ";
+			this->cmRemove->ToolTipText = L"Р’РёРґР°Р»РёС‚Рё РІРёР±СЂР°РЅСѓ РІР°Р»СЋС‚Сѓ Р·С– СЃРїРёСЃРєСѓ";
+			this->cmRemove->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveCurrency);
+			// 
+			// cmShowAll
+			// 
+			this->cmShowAll->Name = L"cmShowAll";
+			this->cmShowAll->Size = System::Drawing::Size(213, 24);
+			this->cmShowAll->Text = L"РџРѕРєР°Р·Р°С‚Рё РІСЃС–";
+			this->cmShowAll->ToolTipText = L"РЎРєР°СЃСѓРІР°С‚Рё РїРѕС€СѓРє Р°Р±Рѕ С„С–Р»СЊС‚СЂ";
+			this->cmShowAll->Click += gcnew System::EventHandler(this, &MyForm::OnShowAll);
 			// 
 			// txtReport
 			// 
 			this->txtReport->BackColor = System::Drawing::SystemColors::Window;
-			this->txtReport->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->txtReport->Font = (gcnew System::Drawing::Font(L"Consolas", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(204)));
-			this->txtReport->Location = System::Drawing::Point(3, 48);
+			this->txtReport->Dock = System::Windows::Forms::DockStyle::Bottom;
+			this->txtReport->Font = (gcnew System::Drawing::Font(L"Consolas", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(204)));
+			this->txtReport->Location = System::Drawing::Point(453, 603);
+			this->txtReport->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
 			this->txtReport->Multiline = true;
 			this->txtReport->Name = L"txtReport";
 			this->txtReport->ReadOnly = true;
 			this->txtReport->ScrollBars = System::Windows::Forms::ScrollBars::Both;
-			this->txtReport->Size = System::Drawing::Size(1086, 520);
+			this->txtReport->Size = System::Drawing::Size(1120, 233);
+			this->txtReport->TabIndex = 1;
+			this->toolTip->SetToolTip(this->txtReport, L"РўСѓС‚ РІС–РґРѕР±СЂР°Р¶Р°СЋС‚СЊСЃСЏ Р·РІС–С‚Рё РїРѕ РєСЂР°С—РЅР°С…");
 			this->txtReport->WordWrap = false;
-			this->txtReport->TabIndex = 0;
-			// 
-			// panelReports
-			// 
-			this->panelReports->Controls->Add(this->btnReportCountries);
-			this->panelReports->Controls->Add(this->btnReportDollars);
-			this->panelReports->Dock = System::Windows::Forms::DockStyle::Top;
-			this->panelReports->Location = System::Drawing::Point(3, 3);
-			this->panelReports->Name = L"panelReports";
-			this->panelReports->Size = System::Drawing::Size(1086, 45);
-			this->panelReports->TabIndex = 1;
-			// 
-			// btnReportCountries
-			// 
-			this->btnReportCountries->Location = System::Drawing::Point(10, 8);
-			this->btnReportCountries->Name = L"btnReportCountries";
-			this->btnReportCountries->Size = System::Drawing::Size(230, 28);
-			this->btnReportCountries->Text = L"Валюти за країнами (А–Я)";
-			this->btnReportCountries->UseVisualStyleBackColor = true;
-			this->btnReportCountries->TabIndex = 0;
-			this->toolTip->SetToolTip(this->btnReportCountries, L"Країни за алфавітом; для кожної — валюти та наявні банкноти");
-			this->btnReportCountries->Click += gcnew System::EventHandler(this, &MyForm::OnReportCountries);
-			// 
-			// btnReportDollars
-			// 
-			this->btnReportDollars->Location = System::Drawing::Point(250, 8);
-			this->btnReportDollars->Name = L"btnReportDollars";
-			this->btnReportDollars->Size = System::Drawing::Size(300, 28);
-			this->btnReportDollars->Text = L"Суми банкнот у доларах за країнами";
-			this->btnReportDollars->UseVisualStyleBackColor = true;
-			this->btnReportDollars->TabIndex = 1;
-			this->toolTip->SetToolTip(this->btnReportDollars, L"Переведення банкнот у долари та загальна сума для кожної країни");
-			this->btnReportDollars->Click += gcnew System::EventHandler(this, &MyForm::OnReportDollars);
-			// 
-			// statusStrip
-			// 
-			this->statusStrip->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->statusLabel });
-			this->statusStrip->Location = System::Drawing::Point(0, 678);
-			this->statusStrip->Name = L"statusStrip";
-			this->statusStrip->Size = System::Drawing::Size(1100, 22);
-			this->statusStrip->TabIndex = 1;
-			this->statusStrip->Text = L"statusStrip";
 			// 
 			// statusLabel
 			// 
 			this->statusLabel->Name = L"statusLabel";
-			this->statusLabel->Text = L"Готово";
+			this->statusLabel->Size = System::Drawing::Size(57, 20);
+			this->statusLabel->Text = L"Р“РѕС‚РѕРІРѕ";
 			// 
-			// toolStrip
+			// statusStrip1
 			// 
-			this->toolStrip->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(16) { this->tbOpen, this->tbSave, this->tsSep1, this->tbAddCurrency, this->tbRemoveCurrency, this->tsSep2, this->tbSearch, this->tbFilter, this->tbShowAll, this->tsSep3, this->tbAddNotes, this->tbRemoveNotes, this->tsSep4, this->tbSort, this->tbReportCountries, this->tbReportDollars });
-			this->toolStrip->Location = System::Drawing::Point(0, 24);
-			this->toolStrip->Name = L"toolStrip";
-			this->toolStrip->ShowItemToolTips = true;
-			this->toolStrip->Size = System::Drawing::Size(1100, 25);
-			this->toolStrip->TabIndex = 2;
-			this->toolStrip->Text = L"toolStrip";
+			this->statusStrip1->ImageScalingSize = System::Drawing::Size(20, 20);
+			this->statusStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->statusLabel });
+			this->statusStrip1->Location = System::Drawing::Point(0, 836);
+			this->statusStrip1->Name = L"statusStrip1";
+			this->statusStrip1->Padding = System::Windows::Forms::Padding(1, 0, 19, 0);
+			this->statusStrip1->Size = System::Drawing::Size(1573, 26);
+			this->statusStrip1->TabIndex = 3;
+			this->statusStrip1->Text = L"statusStrip1";
 			// 
 			// tbOpen
 			// 
 			this->tbOpen->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
 			this->tbOpen->Name = L"tbOpen";
-			this->tbOpen->Text = L"Відкрити";
-			this->tbOpen->ToolTipText = L"Завантажити валюти з файлу (Ctrl+O)";
+			this->tbOpen->Size = System::Drawing::Size(74, 24);
+			this->tbOpen->Text = L"Р’С–РґРєСЂРёС‚Рё";
+			this->tbOpen->ToolTipText = L"Р—Р°РІР°РЅС‚Р°Р¶РёС‚Рё РІР°Р»СЋС‚Рё Р· С„Р°Р№Р»Сѓ (Ctrl+O)";
 			this->tbOpen->Click += gcnew System::EventHandler(this, &MyForm::OnOpenFile);
 			// 
 			// tbSave
 			// 
 			this->tbSave->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
 			this->tbSave->Name = L"tbSave";
-			this->tbSave->Text = L"Зберегти";
-			this->tbSave->ToolTipText = L"Зберегти валюти у файл (Ctrl+S)";
+			this->tbSave->Size = System::Drawing::Size(76, 24);
+			this->tbSave->Text = L"Р—Р±РµСЂРµРіС‚Рё";
+			this->tbSave->ToolTipText = L"Р—Р±РµСЂРµРіС‚Рё РІР°Р»СЋС‚Рё Сѓ С„Р°Р№Р» (Ctrl+S)";
 			this->tbSave->Click += gcnew System::EventHandler(this, &MyForm::OnSaveFile);
 			// 
-			// tsSep1
+			// sepT1
 			// 
-			this->tsSep1->Name = L"tsSep1";
+			this->sepT1->Name = L"sepT1";
+			this->sepT1->Size = System::Drawing::Size(6, 27);
 			// 
-			// tbAddCurrency
+			// tbAdd
 			// 
-			this->tbAddCurrency->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			this->tbAddCurrency->Name = L"tbAddCurrency";
-			this->tbAddCurrency->Text = L"Додати валюту";
-			this->tbAddCurrency->ToolTipText = L"Додати валюту з полів введення (Ctrl+D)";
-			this->tbAddCurrency->Click += gcnew System::EventHandler(this, &MyForm::OnAddCurrency);
+			this->tbAdd->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			this->tbAdd->Name = L"tbAdd";
+			this->tbAdd->Size = System::Drawing::Size(116, 24);
+			this->tbAdd->Text = L"Р”РѕРґР°С‚Рё РІР°Р»СЋС‚Сѓ";
+			this->tbAdd->ToolTipText = L"Р”РѕРґР°С‚Рё РІР°Р»СЋС‚Сѓ Р· РїРѕР»С–РІ Р»С–РІРѕС— РїР°РЅРµР»С– (Ctrl+D)";
+			this->tbAdd->Click += gcnew System::EventHandler(this, &MyForm::OnAddCurrency);
 			// 
-			// tbRemoveCurrency
+			// tbRemove
 			// 
-			this->tbRemoveCurrency->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			this->tbRemoveCurrency->Name = L"tbRemoveCurrency";
-			this->tbRemoveCurrency->Text = L"Видалити";
-			this->tbRemoveCurrency->ToolTipText = L"Видалити вибрану валюту (Ctrl+Del)";
-			this->tbRemoveCurrency->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveCurrency);
+			this->tbRemove->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			this->tbRemove->Name = L"tbRemove";
+			this->tbRemove->Size = System::Drawing::Size(79, 24);
+			this->tbRemove->Text = L"Р’РёРґР°Р»РёС‚Рё";
+			this->tbRemove->ToolTipText = L"Р’РёРґР°Р»РёС‚Рё РІРёР±СЂР°РЅСѓ РІР°Р»СЋС‚Сѓ (Ctrl+Delete)";
+			this->tbRemove->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveCurrency);
 			// 
-			// tsSep2
+			// sepT2
 			// 
-			this->tsSep2->Name = L"tsSep2";
+			this->sepT2->Name = L"sepT2";
+			this->sepT2->Size = System::Drawing::Size(6, 27);
 			// 
 			// tbSearch
 			// 
 			this->tbSearch->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
 			this->tbSearch->Name = L"tbSearch";
-			this->tbSearch->Text = L"Знайти";
-			this->tbSearch->ToolTipText = L"Пошук за назвою (Ctrl+F)";
+			this->tbSearch->Size = System::Drawing::Size(62, 24);
+			this->tbSearch->Text = L"Р—РЅР°Р№С‚Рё";
+			this->tbSearch->ToolTipText = L"РџРѕС€СѓРє Р·Р° РЅР°Р·РІРѕСЋ (Ctrl+F)";
 			this->tbSearch->Click += gcnew System::EventHandler(this, &MyForm::OnSearch);
 			// 
 			// tbFilter
 			// 
 			this->tbFilter->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
 			this->tbFilter->Name = L"tbFilter";
-			this->tbFilter->Text = L"Фільтр за курсом";
-			this->tbFilter->ToolTipText = L"Валюти з курсом від x до y (Ctrl+R)";
+			this->tbFilter->Size = System::Drawing::Size(132, 24);
+			this->tbFilter->Text = L"Р¤С–Р»СЊС‚СЂ Р·Р° РєСѓСЂСЃРѕРј";
+			this->tbFilter->ToolTipText = L"Р’Р°Р»СЋС‚Рё Р· РєСѓСЂСЃРѕРј РІС–Рґ x РґРѕ y (Ctrl+R)";
 			this->tbFilter->Click += gcnew System::EventHandler(this, &MyForm::OnFilterByRate);
 			// 
 			// tbShowAll
 			// 
 			this->tbShowAll->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
 			this->tbShowAll->Name = L"tbShowAll";
-			this->tbShowAll->Text = L"Усі";
-			this->tbShowAll->ToolTipText = L"Показати всі валюти (F5)";
+			this->tbShowAll->Size = System::Drawing::Size(33, 24);
+			this->tbShowAll->Text = L"РЈСЃС–";
+			this->tbShowAll->ToolTipText = L"РџРѕРєР°Р·Р°С‚Рё РІСЃС– РІР°Р»СЋС‚Рё (F5)";
 			this->tbShowAll->Click += gcnew System::EventHandler(this, &MyForm::OnShowAll);
 			// 
-			// tsSep3
+			// sepT3
 			// 
-			this->tsSep3->Name = L"tsSep3";
+			this->sepT3->Name = L"sepT3";
+			this->sepT3->Size = System::Drawing::Size(6, 27);
 			// 
 			// tbAddNotes
 			// 
 			this->tbAddNotes->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
 			this->tbAddNotes->Name = L"tbAddNotes";
-			this->tbAddNotes->Text = L"+ Банкноти";
-			this->tbAddNotes->ToolTipText = L"Додати банкноти (Ctrl+B)";
-			this->tbAddNotes->Click += gcnew System::EventHandler(this, &MyForm::OnAddNotes);
+			this->tbAddNotes->Size = System::Drawing::Size(93, 24);
+			this->tbAddNotes->Text = L"+ Р‘Р°РЅРєРЅРѕС‚Рё";
+			this->tbAddNotes->ToolTipText = L"Р”РѕРґР°С‚Рё Р±Р°РЅРєРЅРѕС‚Рё (Ctrl+B)";
+			this->tbAddNotes->Click += gcnew System::EventHandler(this, &MyForm::OnAddBanknotes);
 			// 
 			// tbRemoveNotes
 			// 
 			this->tbRemoveNotes->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
 			this->tbRemoveNotes->Name = L"tbRemoveNotes";
-			this->tbRemoveNotes->Text = L"– Банкноти";
-			this->tbRemoveNotes->ToolTipText = L"Вилучити банкноти (Ctrl+Shift+B)";
-			this->tbRemoveNotes->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveNotes);
+			this->tbRemoveNotes->Size = System::Drawing::Size(91, 24);
+			this->tbRemoveNotes->Text = L"вЂ“ Р‘Р°РЅРєРЅРѕС‚Рё";
+			this->tbRemoveNotes->ToolTipText = L"Р’РёР»СѓС‡РёС‚Рё Р±Р°РЅРєРЅРѕС‚Рё (Ctrl+Shift+B)";
+			this->tbRemoveNotes->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveBanknotes);
 			// 
-			// tsSep4
+			// sepT4
 			// 
-			this->tsSep4->Name = L"tsSep4";
+			this->sepT4->Name = L"sepT4";
+			this->sepT4->Size = System::Drawing::Size(6, 27);
 			// 
 			// tbSort
 			// 
 			this->tbSort->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
 			this->tbSort->Name = L"tbSort";
-			this->tbSort->Text = L"Сортувати";
-			this->tbSort->ToolTipText = L"Сортування підрахунком за відношенням до долара (F6)";
-			this->tbSort->Click += gcnew System::EventHandler(this, &MyForm::OnSortByDollar);
+			this->tbSort->Size = System::Drawing::Size(84, 24);
+			this->tbSort->Text = L"РЎРѕСЂС‚СѓРІР°С‚Рё";
+			this->tbSort->ToolTipText = L"РЎРѕСЂС‚СѓРІР°РЅРЅСЏ РїС–РґСЂР°С…СѓРЅРєРѕРј Р·Р° РІС–РґРЅРѕС€РµРЅРЅСЏРј РґРѕ $ (F6)";
+			this->tbSort->Click += gcnew System::EventHandler(this, &MyForm::OnSort);
 			// 
-			// tbReportCountries
+			// tbCountries
 			// 
-			this->tbReportCountries->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			this->tbReportCountries->Name = L"tbReportCountries";
-			this->tbReportCountries->Text = L"За країнами";
-			this->tbReportCountries->ToolTipText = L"Валюти та банкноти за країнами (F7)";
-			this->tbReportCountries->Click += gcnew System::EventHandler(this, &MyForm::OnReportCountries);
+			this->tbCountries->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			this->tbCountries->Name = L"tbCountries";
+			this->tbCountries->Size = System::Drawing::Size(98, 24);
+			this->tbCountries->Text = L"Р—Р° РєСЂР°С—РЅР°РјРё";
+			this->tbCountries->ToolTipText = L"Р’Р°Р»СЋС‚Рё Р·Р° РєСЂР°С—РЅР°РјРё Р· Р±Р°РЅРєРЅРѕС‚Р°РјРё (F7)";
+			this->tbCountries->Click += gcnew System::EventHandler(this, &MyForm::OnReportCountries);
 			// 
-			// tbReportDollars
+			// tbDollars
 			// 
-			this->tbReportDollars->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			this->tbReportDollars->Name = L"tbReportDollars";
-			this->tbReportDollars->Text = L"Суми в $";
-			this->tbReportDollars->ToolTipText = L"Суми банкнот у доларах за країнами (F8)";
-			this->tbReportDollars->Click += gcnew System::EventHandler(this, &MyForm::OnReportDollars);
+			this->tbDollars->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			this->tbDollars->Name = L"tbDollars";
+			this->tbDollars->Size = System::Drawing::Size(73, 24);
+			this->tbDollars->Text = L"РЎСѓРјРё РІ $";
+			this->tbDollars->ToolTipText = L"РЎСѓРјРё Р±Р°РЅРєРЅРѕС‚ Сѓ РґРѕР»Р°СЂР°С… Р·Р° РєСЂР°С—РЅР°РјРё (F8)";
+			this->tbDollars->Click += gcnew System::EventHandler(this, &MyForm::OnReportDollars);
 			// 
-			// menuStrip
+			// tbChart
 			// 
-			this->menuStrip->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) { this->miFile, this->miCurrencies, this->miNotes, this->miReports, this->miHelp });
-			this->menuStrip->Location = System::Drawing::Point(0, 0);
-			this->menuStrip->Name = L"menuStrip";
-			this->menuStrip->ShowItemToolTips = true;
-			this->menuStrip->Size = System::Drawing::Size(1100, 24);
-			this->menuStrip->TabIndex = 3;
-			this->menuStrip->Text = L"menuStrip";
+			this->tbChart->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			this->tbChart->Name = L"tbChart";
+			this->tbChart->Size = System::Drawing::Size(77, 24);
+			this->tbChart->Text = L"Р”С–Р°РіСЂР°РјР°";
+			this->tbChart->ToolTipText = L"Р”С–Р°РіСЂР°РјР° СЃСѓРј Р·Р° РєСЂР°С—РЅР°РјРё (F9)";
+			this->tbChart->Click += gcnew System::EventHandler(this, &MyForm::OnShowChart);
 			// 
-			// miFile
+			// toolStrip1
 			// 
-			this->miFile->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) { this->miNew, this->miOpen, this->miSave, this->sepFile, this->miExit });
-			this->miFile->Name = L"miFile";
-			this->miFile->Text = L"&Файл";
-			// 
-			// miNew
-			// 
-			this->miNew->Name = L"miNew";
-			this->miNew->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::N));
-			this->miNew->Text = L"&Новий (очистити дані)";
-			this->miNew->ToolTipText = L"Видалити всі валюти з пам'яті програми";
-			this->miNew->Click += gcnew System::EventHandler(this, &MyForm::OnNewData);
+			this->toolStrip1->ImageScalingSize = System::Drawing::Size(20, 20);
+			this->toolStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(17) {
+				this->tbOpen, this->tbSave,
+					this->sepT1, this->tbAdd, this->tbRemove, this->sepT2, this->tbSearch, this->tbFilter, this->tbShowAll, this->sepT3, this->tbAddNotes,
+					this->tbRemoveNotes, this->sepT4, this->tbSort, this->tbCountries, this->tbDollars, this->tbChart
+			});
+			this->toolStrip1->Location = System::Drawing::Point(0, 28);
+			this->toolStrip1->Name = L"toolStrip1";
+			this->toolStrip1->Size = System::Drawing::Size(1573, 27);
+			this->toolStrip1->TabIndex = 4;
+			this->toolStrip1->Text = L"toolStrip1";
 			// 
 			// miOpen
 			// 
 			this->miOpen->Name = L"miOpen";
 			this->miOpen->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::O));
-			this->miOpen->Text = L"&Відкрити з файлу...";
-			this->miOpen->ToolTipText = L"Режим введення №2: завантажити валюти з текстового файлу";
+			this->miOpen->Size = System::Drawing::Size(272, 26);
+			this->miOpen->Text = L"&Р’С–РґРєСЂРёС‚Рё Р· С„Р°Р№Р»Сѓ...";
+			this->miOpen->ToolTipText = L"Р РµР¶РёРј РІРІРµРґРµРЅРЅСЏ в„–2: Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё РІР°Р»СЋС‚Рё Р· С‚РµРєСЃС‚РѕРІРѕРіРѕ С„Р°Р№Р»Сѓ";
 			this->miOpen->Click += gcnew System::EventHandler(this, &MyForm::OnOpenFile);
 			// 
 			// miSave
 			// 
 			this->miSave->Name = L"miSave";
 			this->miSave->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::S));
-			this->miSave->Text = L"&Зберегти у файл...";
-			this->miSave->ToolTipText = L"Записати всі валюти у текстовий файл";
+			this->miSave->Size = System::Drawing::Size(272, 26);
+			this->miSave->Text = L"&Р—Р±РµСЂРµРіС‚Рё Сѓ С„Р°Р№Р»...";
+			this->miSave->ToolTipText = L"Р—Р°РїРёСЃР°С‚Рё РІСЃС– РІР°Р»СЋС‚Рё Сѓ С‚РµРєСЃС‚РѕРІРёР№ С„Р°Р№Р»";
 			this->miSave->Click += gcnew System::EventHandler(this, &MyForm::OnSaveFile);
 			// 
-			// sepFile
+			// sepF1
 			// 
-			this->sepFile->Name = L"sepFile";
+			this->sepF1->Name = L"sepF1";
+			this->sepF1->Size = System::Drawing::Size(269, 6);
+			// 
+			// miClear
+			// 
+			this->miClear->Name = L"miClear";
+			this->miClear->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::N));
+			this->miClear->Size = System::Drawing::Size(272, 26);
+			this->miClear->Text = L"&РћС‡РёСЃС‚РёС‚Рё СЃРїРёСЃРѕРє";
+			this->miClear->ToolTipText = L"Р’РёРґР°Р»РёС‚Рё РІСЃС– РІР°Р»СЋС‚Рё Р· РїР°Рј\'СЏС‚С– РїСЂРѕРіСЂР°РјРё";
+			this->miClear->Click += gcnew System::EventHandler(this, &MyForm::OnClearAll);
+			// 
+			// sepF2
+			// 
+			this->sepF2->Name = L"sepF2";
+			this->sepF2->Size = System::Drawing::Size(269, 6);
 			// 
 			// miExit
 			// 
 			this->miExit->Name = L"miExit";
-			this->miExit->Text = L"В&ихід";
-			this->miExit->ToolTipText = L"Закрити програму";
+			this->miExit->Size = System::Drawing::Size(272, 26);
+			this->miExit->Text = L"Р’РёС…С–Рґ";
+			this->miExit->ToolTipText = L"Р—Р°РєСЂРёС‚Рё РїСЂРѕРіСЂР°РјСѓ";
 			this->miExit->Click += gcnew System::EventHandler(this, &MyForm::OnExit);
 			// 
-			// miCurrencies
+			// miFile
 			// 
-			this->miCurrencies->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) { this->miAddCurrency, this->miRemoveCurrency, this->sepCurrencies, this->miSearch, this->miFilter, this->miShowAll });
-			this->miCurrencies->Name = L"miCurrencies";
-			this->miCurrencies->Text = L"&Валюти";
+			this->miFile->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) {
+				this->miOpen, this->miSave,
+					this->sepF1, this->miClear, this->sepF2, this->miExit
+			});
+			this->miFile->Name = L"miFile";
+			this->miFile->Size = System::Drawing::Size(59, 24);
+			this->miFile->Text = L"&Р¤Р°Р№Р»";
+			this->miFile->ToolTipText = L"Р РѕР±РѕС‚Р° Р· С„Р°Р№Р»Р°РјРё";
 			// 
-			// miAddCurrency
+			// miAdd
 			// 
-			this->miAddCurrency->Name = L"miAddCurrency";
-			this->miAddCurrency->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::D));
-			this->miAddCurrency->Text = L"&Додати з полів введення";
-			this->miAddCurrency->ToolTipText = L"Режим введення №1: додати валюту з клавіатури";
-			this->miAddCurrency->Click += gcnew System::EventHandler(this, &MyForm::OnAddCurrency);
+			this->miAdd->Name = L"miAdd";
+			this->miAdd->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::D));
+			this->miAdd->Size = System::Drawing::Size(286, 26);
+			this->miAdd->Text = L"&Р”РѕРґР°С‚Рё РІР°Р»СЋС‚Сѓ";
+			this->miAdd->ToolTipText = L"Р РµР¶РёРј РІРІРµРґРµРЅРЅСЏ в„–1: РґРѕРґР°С‚Рё РІР°Р»СЋС‚Сѓ Р· РїРѕР»С–РІ Р»С–РІРѕС— РїР°РЅРµР»С–";
+			this->miAdd->Click += gcnew System::EventHandler(this, &MyForm::OnAddCurrency);
 			// 
-			// miRemoveCurrency
+			// miRemove
 			// 
-			this->miRemoveCurrency->Name = L"miRemoveCurrency";
-			this->miRemoveCurrency->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Delete));
-			this->miRemoveCurrency->Text = L"Ви&далити вибрану";
-			this->miRemoveCurrency->ToolTipText = L"Видалити вибрану в таблиці валюту";
-			this->miRemoveCurrency->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveCurrency);
+			this->miRemove->Name = L"miRemove";
+			this->miRemove->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Delete));
+			this->miRemove->Size = System::Drawing::Size(286, 26);
+			this->miRemove->Text = L"Р’Рё&РґР°Р»РёС‚Рё РІРёР±СЂР°РЅСѓ";
+			this->miRemove->ToolTipText = L"Р’РёРґР°Р»РёС‚Рё РІРёР±СЂР°РЅСѓ РІ С‚Р°Р±Р»РёС†С– РІР°Р»СЋС‚Сѓ";
+			this->miRemove->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveCurrency);
 			// 
-			// sepCurrencies
+			// sepC1
 			// 
-			this->sepCurrencies->Name = L"sepCurrencies";
+			this->sepC1->Name = L"sepC1";
+			this->sepC1->Size = System::Drawing::Size(283, 6);
 			// 
 			// miSearch
 			// 
 			this->miSearch->Name = L"miSearch";
 			this->miSearch->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::F));
-			this->miSearch->Text = L"&Знайти за назвою";
-			this->miSearch->ToolTipText = L"Пошук валюти за назвою (повною або частковою)";
+			this->miSearch->Size = System::Drawing::Size(286, 26);
+			this->miSearch->Text = L"&Р—РЅР°Р№С‚Рё Р·Р° РЅР°Р·РІРѕСЋ";
+			this->miSearch->ToolTipText = L"РџРѕС€СѓРє РІР°Р»СЋС‚Рё Р·Р° РЅР°Р·РІРѕСЋ";
 			this->miSearch->Click += gcnew System::EventHandler(this, &MyForm::OnSearch);
 			// 
 			// miFilter
 			// 
 			this->miFilter->Name = L"miFilter";
 			this->miFilter->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::R));
-			this->miFilter->Text = L"Фільтр за &курсом";
-			this->miFilter->ToolTipText = L"Показати валюти з курсом від x до y";
+			this->miFilter->Size = System::Drawing::Size(286, 26);
+			this->miFilter->Text = L"Р¤С–Р»СЊС‚СЂ Р·Р° &РєСѓСЂСЃРѕРј";
+			this->miFilter->ToolTipText = L"РџРѕРєР°Р·Р°С‚Рё РІР°Р»СЋС‚Рё Р· РєСѓСЂСЃРѕРј РІС–Рґ x РґРѕ y";
 			this->miFilter->Click += gcnew System::EventHandler(this, &MyForm::OnFilterByRate);
 			// 
 			// miShowAll
 			// 
 			this->miShowAll->Name = L"miShowAll";
 			this->miShowAll->ShortcutKeys = System::Windows::Forms::Keys::F5;
-			this->miShowAll->Text = L"Показати &всі";
-			this->miShowAll->ToolTipText = L"Скасувати пошук або фільтр";
+			this->miShowAll->Size = System::Drawing::Size(286, 26);
+			this->miShowAll->Text = L"РџРѕРєР°Р·Р°С‚Рё &РІСЃС–";
+			this->miShowAll->ToolTipText = L"РЎРєР°СЃСѓРІР°С‚Рё РїРѕС€СѓРє Р°Р±Рѕ С„С–Р»СЊС‚СЂ";
 			this->miShowAll->Click += gcnew System::EventHandler(this, &MyForm::OnShowAll);
 			// 
-			// miNotes
+			// miCurrency
 			// 
-			this->miNotes->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) { this->miAddNotes, this->miRemoveNotes });
-			this->miNotes->Name = L"miNotes";
-			this->miNotes->Text = L"&Банкноти";
+			this->miCurrency->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) {
+				this->miAdd, this->miRemove,
+					this->sepC1, this->miSearch, this->miFilter, this->miShowAll
+			});
+			this->miCurrency->Name = L"miCurrency";
+			this->miCurrency->Size = System::Drawing::Size(74, 24);
+			this->miCurrency->Text = L"&Р’Р°Р»СЋС‚Р°";
+			this->miCurrency->ToolTipText = L"РћРїРµСЂР°С†С–С— Р· РІР°Р»СЋС‚Р°РјРё";
 			// 
 			// miAddNotes
 			// 
 			this->miAddNotes->Name = L"miAddNotes";
 			this->miAddNotes->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::B));
-			this->miAddNotes->Text = L"&Додати банкноти";
-			this->miAddNotes->ToolTipText = L"Додати банкноти вибраній валюті";
-			this->miAddNotes->Click += gcnew System::EventHandler(this, &MyForm::OnAddNotes);
+			this->miAddNotes->Size = System::Drawing::Size(318, 26);
+			this->miAddNotes->Text = L"&Р”РѕРґР°С‚Рё Р±Р°РЅРєРЅРѕС‚Рё";
+			this->miAddNotes->ToolTipText = L"Р”РѕРґР°С‚Рё Р±Р°РЅРєРЅРѕС‚Рё РІРёР±СЂР°РЅС–Р№ РІР°Р»СЋС‚С–";
+			this->miAddNotes->Click += gcnew System::EventHandler(this, &MyForm::OnAddBanknotes);
 			// 
 			// miRemoveNotes
 			// 
 			this->miRemoveNotes->Name = L"miRemoveNotes";
-			this->miRemoveNotes->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Shift | System::Windows::Forms::Keys::B));
-			this->miRemoveNotes->Text = L"&Вилучити банкноти";
-			this->miRemoveNotes->ToolTipText = L"Вилучити банкноти у вибраної валюти";
-			this->miRemoveNotes->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveNotes);
+			this->miRemoveNotes->ShortcutKeys = static_cast<System::Windows::Forms::Keys>(((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Shift)
+				| System::Windows::Forms::Keys::B));
+			this->miRemoveNotes->Size = System::Drawing::Size(318, 26);
+			this->miRemoveNotes->Text = L"&Р’РёР»СѓС‡РёС‚Рё Р±Р°РЅРєРЅРѕС‚Рё";
+			this->miRemoveNotes->ToolTipText = L"Р’РёР»СѓС‡РёС‚Рё Р±Р°РЅРєРЅРѕС‚Рё Сѓ РІРёР±СЂР°РЅРѕС— РІР°Р»СЋС‚Рё";
+			this->miRemoveNotes->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveBanknotes);
 			// 
-			// miReports
+			// miNotes
 			// 
-			this->miReports->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(3) { this->miSort, this->miReportCountries, this->miReportDollars });
-			this->miReports->Name = L"miReports";
-			this->miReports->Text = L"&Звіти";
+			this->miNotes->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {
+				this->miAddNotes,
+					this->miRemoveNotes
+			});
+			this->miNotes->Name = L"miNotes";
+			this->miNotes->Size = System::Drawing::Size(89, 24);
+			this->miNotes->Text = L"&Р‘Р°РЅРєРЅРѕС‚Рё";
+			this->miNotes->ToolTipText = L"РћРїРµСЂР°С†С–С— Р· Р±Р°РЅРєРЅРѕС‚Р°РјРё";
 			// 
 			// miSort
 			// 
 			this->miSort->Name = L"miSort";
 			this->miSort->ShortcutKeys = System::Windows::Forms::Keys::F6;
-			this->miSort->Text = L"&Сортування за відношенням до $";
-			this->miSort->ToolTipText = L"Сортування підрахунком за відношенням до долара";
-			this->miSort->Click += gcnew System::EventHandler(this, &MyForm::OnSortByDollar);
+			this->miSort->Size = System::Drawing::Size(338, 26);
+			this->miSort->Text = L"&РЎРѕСЂС‚СѓРІР°С‚Рё Р·Р° РІС–РґРЅРѕС€РµРЅРЅСЏРј РґРѕ $";
+			this->miSort->ToolTipText = L"РЎРѕСЂС‚СѓРІР°РЅРЅСЏ РјРµС‚РѕРґРѕРј РїС–РґСЂР°С…СѓРЅРєСѓ";
+			this->miSort->Click += gcnew System::EventHandler(this, &MyForm::OnSort);
 			// 
-			// miReportCountries
+			// miCountries
 			// 
-			this->miReportCountries->Name = L"miReportCountries";
-			this->miReportCountries->ShortcutKeys = System::Windows::Forms::Keys::F7;
-			this->miReportCountries->Text = L"Валюти за &країнами";
-			this->miReportCountries->ToolTipText = L"Країни за алфавітом; для кожної — валюти та банкноти";
-			this->miReportCountries->Click += gcnew System::EventHandler(this, &MyForm::OnReportCountries);
+			this->miCountries->Name = L"miCountries";
+			this->miCountries->ShortcutKeys = System::Windows::Forms::Keys::F7;
+			this->miCountries->Size = System::Drawing::Size(338, 26);
+			this->miCountries->Text = L"Р’Р°Р»СЋС‚Рё Р·Р° &РєСЂР°С—РЅР°РјРё";
+			this->miCountries->ToolTipText = L"РљСЂР°С—РЅРё Р·Р° Р°Р»С„Р°РІС–С‚РѕРј; РґР»СЏ РєРѕР¶РЅРѕС— - РІР°Р»СЋС‚Рё С‚Р° Р±Р°РЅРєРЅРѕС‚Рё";
+			this->miCountries->Click += gcnew System::EventHandler(this, &MyForm::OnReportCountries);
 			// 
-			// miReportDollars
+			// miDollars
 			// 
-			this->miReportDollars->Name = L"miReportDollars";
-			this->miReportDollars->ShortcutKeys = System::Windows::Forms::Keys::F8;
-			this->miReportDollars->Text = L"Суми в &доларах за країнами";
-			this->miReportDollars->ToolTipText = L"Переведення банкнот у долари та загальна сума по країні";
-			this->miReportDollars->Click += gcnew System::EventHandler(this, &MyForm::OnReportDollars);
+			this->miDollars->Name = L"miDollars";
+			this->miDollars->ShortcutKeys = System::Windows::Forms::Keys::F8;
+			this->miDollars->Size = System::Drawing::Size(338, 26);
+			this->miDollars->Text = L"РЎСѓРјРё Р±Р°РЅРєРЅРѕС‚ Сѓ &РґРѕР»Р°СЂР°С…";
+			this->miDollars->ToolTipText = L"Р‘Р°РЅРєРЅРѕС‚Рё РІ РґРѕР»Р°СЂР°С… С– Р·Р°РіР°Р»СЊРЅР° СЃСѓРјР° РґР»СЏ РєРѕР¶РЅРѕС— РєСЂР°С—РЅРё";
+			this->miDollars->Click += gcnew System::EventHandler(this, &MyForm::OnReportDollars);
 			// 
-			// miHelp
+			// miChart
 			// 
-			this->miHelp->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) { this->miFileFormat, this->miAbout });
-			this->miHelp->Name = L"miHelp";
-			this->miHelp->Text = L"&Довідка";
+			this->miChart->Name = L"miChart";
+			this->miChart->ShortcutKeys = System::Windows::Forms::Keys::F9;
+			this->miChart->Size = System::Drawing::Size(338, 26);
+			this->miChart->Text = L"&Р”С–Р°РіСЂР°РјР° СЃСѓРј";
+			this->miChart->ToolTipText = L"Р’С–Р·СѓР°Р»СЊРЅР° РґС–Р°РіСЂР°РјР° СЃСѓРј Р·Р° РєСЂР°С—РЅР°РјРё";
+			this->miChart->Click += gcnew System::EventHandler(this, &MyForm::OnShowChart);
 			// 
-			// miFileFormat
+			// miCalc
 			// 
-			this->miFileFormat->Name = L"miFileFormat";
-			this->miFileFormat->ShortcutKeys = System::Windows::Forms::Keys::F1;
-			this->miFileFormat->Text = L"&Формат файлу даних";
-			this->miFileFormat->ToolTipText = L"Опис структури вхідного файлу";
-			this->miFileFormat->Click += gcnew System::EventHandler(this, &MyForm::OnFileFormatHelp);
+			this->miCalc->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(4) {
+				this->miSort, this->miCountries,
+					this->miDollars, this->miChart
+			});
+			this->miCalc->Name = L"miCalc";
+			this->miCalc->Size = System::Drawing::Size(109, 24);
+			this->miCalc->Text = L"&РћР±С‡РёСЃР»РµРЅРЅСЏ";
+			this->miCalc->ToolTipText = L"РЎРѕСЂС‚СѓРІР°РЅРЅСЏ, Р·РІС–С‚Рё Р№ РґС–Р°РіСЂР°РјР°";
+			// 
+			// miFormat
+			// 
+			this->miFormat->Name = L"miFormat";
+			this->miFormat->ShortcutKeys = System::Windows::Forms::Keys::F1;
+			this->miFormat->Size = System::Drawing::Size(261, 26);
+			this->miFormat->Text = L"&Р¤РѕСЂРјР°С‚ С„Р°Р№Р»Сѓ РґР°РЅРёС…";
+			this->miFormat->ToolTipText = L"РЇРє РјР°С” РІРёРіР»СЏРґР°С‚Рё РІС…С–РґРЅРёР№ С‚РµРєСЃС‚РѕРІРёР№ С„Р°Р№Р»";
+			this->miFormat->Click += gcnew System::EventHandler(this, &MyForm::OnFileFormat);
 			// 
 			// miAbout
 			// 
 			this->miAbout->Name = L"miAbout";
-			this->miAbout->Text = L"&Про програму";
-			this->miAbout->ToolTipText = L"Відомості про програму";
+			this->miAbout->Size = System::Drawing::Size(261, 26);
+			this->miAbout->Text = L"&РџСЂРѕ РїСЂРѕРіСЂР°РјСѓ";
+			this->miAbout->ToolTipText = L"Р’С–РґРѕРјРѕСЃС‚С– РїСЂРѕ РїСЂРѕРіСЂР°РјСѓ";
 			this->miAbout->Click += gcnew System::EventHandler(this, &MyForm::OnAbout);
 			// 
-			// gridMenu
+			// miHelp
 			// 
-			this->gridMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) { this->cmAddNotes, this->cmRemoveNotes, this->cmSep, this->cmRemoveCurrency, this->cmShowAll });
-			this->gridMenu->Name = L"gridMenu";
-			this->gridMenu->Size = System::Drawing::Size(200, 98);
+			this->miHelp->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) { this->miFormat, this->miAbout });
+			this->miHelp->Name = L"miHelp";
+			this->miHelp->Size = System::Drawing::Size(77, 24);
+			this->miHelp->Text = L"&Р”РѕРІС–РґРєР°";
+			this->miHelp->ToolTipText = L"Р”РѕРІС–РґРєРѕРІР° С–РЅС„РѕСЂРјР°С†С–СЏ";
 			// 
-			// cmAddNotes
+			// menuStrip1
 			// 
-			this->cmAddNotes->Name = L"cmAddNotes";
-			this->cmAddNotes->Text = L"Додати банкноти";
-			this->cmAddNotes->ToolTipText = L"Додати банкноти вибраній валюті";
-			this->cmAddNotes->Click += gcnew System::EventHandler(this, &MyForm::OnAddNotes);
-			// 
-			// cmRemoveNotes
-			// 
-			this->cmRemoveNotes->Name = L"cmRemoveNotes";
-			this->cmRemoveNotes->Text = L"Вилучити банкноти";
-			this->cmRemoveNotes->ToolTipText = L"Вилучити банкноти у вибраної валюти";
-			this->cmRemoveNotes->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveNotes);
-			// 
-			// cmSep
-			// 
-			this->cmSep->Name = L"cmSep";
-			// 
-			// cmRemoveCurrency
-			// 
-			this->cmRemoveCurrency->Name = L"cmRemoveCurrency";
-			this->cmRemoveCurrency->Text = L"Видалити валюту";
-			this->cmRemoveCurrency->ToolTipText = L"Видалити вибрану валюту";
-			this->cmRemoveCurrency->Click += gcnew System::EventHandler(this, &MyForm::OnRemoveCurrency);
-			// 
-			// cmShowAll
-			// 
-			this->cmShowAll->Name = L"cmShowAll";
-			this->cmShowAll->Text = L"Показати всі валюти";
-			this->cmShowAll->ToolTipText = L"Скасувати пошук або фільтр";
-			this->cmShowAll->Click += gcnew System::EventHandler(this, &MyForm::OnShowAll);
+			this->menuStrip1->ImageScalingSize = System::Drawing::Size(20, 20);
+			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) {
+				this->miFile, this->miCurrency,
+					this->miNotes, this->miCalc, this->miHelp
+			});
+			this->menuStrip1->Location = System::Drawing::Point(0, 0);
+			this->menuStrip1->Name = L"menuStrip1";
+			this->menuStrip1->ShowItemToolTips = true;
+			this->menuStrip1->Size = System::Drawing::Size(1573, 28);
+			this->menuStrip1->TabIndex = 5;
+			this->menuStrip1->Text = L"menuStrip1";
 			// 
 			// toolTip
 			// 
-			this->toolTip->AutoPopDelay = 9000;
-			this->toolTip->InitialDelay = 400;
+			this->toolTip->AutoPopDelay = 5000;
+			this->toolTip->InitialDelay = 300;
+			this->toolTip->ReshowDelay = 100;
+			this->toolTip->ShowAlways = true;
+			this->toolTip->Popup += gcnew System::Windows::Forms::PopupEventHandler(this, &MyForm::toolTip_Popup);
 			// 
 			// MyForm
 			// 
-			this->AutoScaleDimensions = System::Drawing::SizeF(96, 96);
-			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
-			this->ClientSize = System::Drawing::Size(1100, 700);
-			this->Controls->Add(this->tabs);
-			this->Controls->Add(this->statusStrip);
-			this->Controls->Add(this->toolStrip);
-			this->Controls->Add(this->menuStrip);
-			this->MainMenuStrip = this->menuStrip;
-			this->MinimumSize = System::Drawing::Size(1000, 600);
+			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
+			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
+			this->ClientSize = System::Drawing::Size(1573, 862);
+			this->Controls->Add(this->grid);
+			this->Controls->Add(this->txtReport);
+			this->Controls->Add(this->panelLeft);
+			this->Controls->Add(this->statusStrip1);
+			this->Controls->Add(this->toolStrip1);
+			this->Controls->Add(this->menuStrip1);
+			this->MainMenuStrip = this->menuStrip1;
+			this->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->MinimumSize = System::Drawing::Size(1327, 789);
 			this->Name = L"MyForm";
 			this->StartPosition = System::Windows::Forms::FormStartPosition::CenterScreen;
-			this->Text = L"Облік валют";
-			this->Load += gcnew System::EventHandler(this, &MyForm::MyForm_Load);
-			this->menuStrip->ResumeLayout(false);
-			this->menuStrip->PerformLayout();
-			this->toolStrip->ResumeLayout(false);
-			this->toolStrip->PerformLayout();
-			this->statusStrip->ResumeLayout(false);
-			this->statusStrip->PerformLayout();
-			this->gridMenu->ResumeLayout(false);
-			this->gridMenu->PerformLayout();
-			this->tabs->ResumeLayout(false);
-			this->tabs->PerformLayout();
-			this->tabCurrencies->ResumeLayout(false);
-			this->tabCurrencies->PerformLayout();
-			this->tabReports->ResumeLayout(false);
-			this->tabReports->PerformLayout();
-			this->grpInput->ResumeLayout(false);
-			this->grpInput->PerformLayout();
-			this->grpSearch->ResumeLayout(false);
-			this->grpSearch->PerformLayout();
-			this->grpNotes->ResumeLayout(false);
-			this->grpNotes->PerformLayout();
-			this->panelReports->ResumeLayout(false);
-			this->panelReports->PerformLayout();
+			this->Text = L"РћР±Р»С–Рє РІР°Р»СЋС‚";
+			this->groupNew->ResumeLayout(false);
+			this->groupNew->PerformLayout();
+			this->groupSearch->ResumeLayout(false);
+			this->groupSearch->PerformLayout();
+			this->groupNotes->ResumeLayout(false);
+			this->groupNotes->PerformLayout();
+			this->groupCalc->ResumeLayout(false);
+			this->panelLeft->ResumeLayout(false);
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->grid))->EndInit();
+			this->gridMenu->ResumeLayout(false);
+			this->statusStrip1->ResumeLayout(false);
+			this->statusStrip1->PerformLayout();
+			this->toolStrip1->ResumeLayout(false);
+			this->toolStrip1->PerformLayout();
+			this->menuStrip1->ResumeLayout(false);
+			this->menuStrip1->PerformLayout();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
 		}
 #pragma endregion
-	private: System::Void MyForm_Load(System::Object^ sender, System::EventArgs^ e) {
-	}
 
-	private:
-		// =====================================================================
-		//  Допоміжні методи відображення
-		// =====================================================================
-		System::Void SetStatus(System::String^ message) {
-			statusLabel->Text = System::String::Format(L"{0}  |  Усього валют: {1}  |  У таблиці: {2}",
-				message, repository->Count(), shown->Count());
+		static std::string ToStd(String^ text)
+		{
+			return msclr::interop::marshal_as<std::string>(text);
 		}
 
-		System::Void ShowWarning(System::String^ message) {
-			MessageBox::Show(message, L"Попередження", MessageBoxButtons::OK, MessageBoxIcon::Warning);
+		static String^ ToNet(const std::string& text)
+		{
+			return gcnew String(text.c_str());
 		}
 
-		System::Void ShowError(System::String^ message) {
-			MessageBox::Show(message, L"Помилка", MessageBoxButtons::OK, MessageBoxIcon::Error);
+		void SetStatus(String^ text)
+		{
+			statusLabel->Text = text;
 		}
 
-		System::Void ShowNativeError(CurrencyException& ex) {
-			ShowWarning(StringBridge::ToManaged(ex.Reason()));
+		// РџРѕРєР°Р·СѓС” РїРѕРІС–РґРѕРјР»РµРЅРЅСЏ РїСЂРѕ РІРёРЅСЏС‚РєРѕРІСѓ СЃРёС‚СѓР°С†С–СЋ
+		void ShowError(CurrencyException& ex)
+		{
+			MessageBox::Show(ToNet(ex.GetText()), L"РџРѕРјРёР»РєР°", MessageBoxButtons::OK, MessageBoxIcon::Warning);
+			SetStatus(String::Concat(L"РџРѕРјРёР»РєР°: ", ToNet(ex.GetText())));
 		}
 
-		/// Заповнює таблицю валютами, індекси яких лежать у shown.
-		System::Void RefillGrid(System::String^ status) {
+		// Р—Р°РїРѕРІРЅСЋС” С‚Р°Р±Р»РёС†СЋ РїРµСЂРµРґР°РЅРёРј СЃРїРёСЃРєРѕРј РІР°Р»СЋС‚
+		void RefreshGrid(const std::vector<Currency>& list)
+		{
 			grid->Rows->Clear();
-			for (int i = 0; i < shown->Count(); i++) {
-				const Currency& currency = repository->GetAt(shown->At(i));
-				array<System::Object^>^ cells = gcnew array<System::Object^>{
-					StringBridge::ToManaged(currency.GetName()),
-						StringBridge::ToManaged(currency.GetCountry()),
-						StringBridge::ToManaged(WideString::FromDoubleShort(currency.GetRate())),
-						StringBridge::ToManaged(WideString::FromDoubleShort(currency.GetRateToDollar())),
-						StringBridge::ToManaged(currency.GetBanknotes().ToDisplayString())
-				};
-				grid->Rows->Add(cells);
-			}
-			SetStatus(status);
-		}
-
-		/// Показує всі валюти сховища.
-		System::Void ShowAll() {
-			DynamicArray<int>* all = new DynamicArray<int>();
-			for (int i = 0; i < repository->Count(); i++) {
-				all->Add(i);
-			}
-			delete shown;
-			shown = all;
-			RefillGrid(L"Готово");
-		}
-
-		/// Показує лише валюти з переданими індексами (результат пошуку або фільтра).
-		System::Void ShowIndices(DynamicArray<int>& indices, System::String^ status) {
-			DynamicArray<int>* selected = new DynamicArray<int>(static_cast<DynamicArray<int>&&>(indices));
-			delete shown;
-			shown = selected;
-			RefillGrid(status);
-		}
-
-		/// Номер вибраного рядка таблиці (інакше — ItemNotFoundException).
-		int GetSelectedRow() {
-			if (grid->CurrentRow == nullptr || grid->CurrentRow->Index < 0 || grid->CurrentRow->Index >= shown->Count()) {
-				throw ItemNotFoundException(L"Спочатку виберіть валюту в таблиці.");
-			}
-			return grid->CurrentRow->Index;
-		}
-
-		System::Void RestoreSelection(int row) {
-			if (grid->Rows->Count == 0) {
-				return;
-			}
-			if (row >= grid->Rows->Count) {
-				row = grid->Rows->Count - 1;
-			}
-			grid->CurrentCell = grid->Rows[row]->Cells[0];
-			grid->Rows[row]->Selected = true;
-		}
-
-		System::Void ClearInputFields() {
-			txtName->Text = System::String::Empty;
-			txtCountry->Text = System::String::Empty;
-			txtRate->Text = System::String::Empty;
-			txtDollar->Text = System::String::Empty;
-			txtNotes->Text = System::String::Empty;
-			txtName->Focus();
-		}
-
-		// =====================================================================
-		//  Обробники подій
-		// =====================================================================
-		System::Void OnGridCellMouseDown(System::Object^ sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^ e) {
-			if (e->Button == System::Windows::Forms::MouseButtons::Right && e->RowIndex >= 0) {
-				grid->ClearSelection();
-				grid->Rows[e->RowIndex]->Selected = true;
-				grid->CurrentCell = grid->Rows[e->RowIndex]->Cells[0];
+			for (size_t i = 0; i < list.size(); i++)
+			{
+				const Currency& c = list[i];
+				cli::array<Object^>^ row = gcnew cli::array<Object^>(5);
+				row[0] = ToNet(c.GetName());
+				row[1] = ToNet(c.GetCountry());
+				row[2] = Convert::ToString(c.GetRate(), CultureInfo::InvariantCulture);
+				row[3] = Convert::ToString(c.GetDollarRatio());
+				row[4] = ToNet(c.BanknotesToString());
+				grid->Rows->Add(row);
 			}
 		}
 
-		System::Void OnNewData(System::Object^ sender, System::EventArgs^ e) {
-			try {
-				if (MessageBox::Show(L"Видалити всі валюти з пам'яті?", L"Підтвердження",
-					MessageBoxButtons::YesNo, MessageBoxIcon::Question) != System::Windows::Forms::DialogResult::Yes) {
+		// Р’РёРґС–Р»СЏС” РІ С‚Р°Р±Р»РёС†С– СЂСЏРґРѕРє Р· РІРєР°Р·Р°РЅРѕСЋ РЅР°Р·РІРѕСЋ
+		void SelectByName(const std::string& name)
+		{
+			String^ target = ToNet(name);
+			for (int i = 0; i < grid->Rows->Count; i++)
+			{
+				if (grid->Rows[i]->Cells[0]->Value->ToString() == target)
+				{
+					grid->CurrentCell = grid->Rows[i]->Cells[0];
 					return;
 				}
-				repository->Clear();
-				ShowAll();
-				txtReport->Clear();
-			}
-			catch (CurrencyException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (System::Exception^ ex) {
-				ShowError(ex->Message);
 			}
 		}
 
-		System::Void OnOpenFile(System::Object^ sender, System::EventArgs^ e) {
-			OpenFileDialog^ dialog = gcnew OpenFileDialog();
-			dialog->Title = L"Відкрити файл із валютами";
-			dialog->Filter = L"Текстові файли (*.txt)|*.txt|Усі файли (*.*)|*.*";
-			if (dialog->ShowDialog() != System::Windows::Forms::DialogResult::OK) {
-				return;
+		// РќР°Р·РІР° РІР°Р»СЋС‚Рё, РІРёР±СЂР°РЅРѕС— РІ С‚Р°Р±Р»РёС†С–
+		std::string SelectedName()
+		{
+			if (grid->CurrentRow == nullptr)
+				throw CurrencyException("РЎРїРѕС‡Р°С‚РєСѓ РІРёР±РµСЂС–С‚СЊ РІР°Р»СЋС‚Сѓ РІ С‚Р°Р±Р»РёС†С–");
+			return ToStd(grid->CurrentRow->Cells[0]->Value->ToString());
+		}
+
+		// РўРµРєСЃС‚РѕРІРµ РїРѕР»Рµ РЅРµ РјР°С” Р±СѓС‚Рё РїРѕСЂРѕР¶РЅС–Рј
+		void RequireText(TextBox^ box, const std::string& message)
+		{
+			if (box->Text->Trim()->Length == 0)
+				throw CurrencyException(message);
+		}
+
+		// Р—С‡РёС‚СѓРІР°РЅРЅСЏ РґС–Р№СЃРЅРѕРіРѕ С‡РёСЃР»Р° Р· РїРѕР»СЏ (РєСЂР°РїРєР° Р°Р±Рѕ РєРѕРјР°)
+		double ReadDouble(TextBox^ box, const std::string& fieldName)
+		{
+			double value;
+			String^ text = box->Text->Trim()->Replace(L',', L'.');
+			if (!Double::TryParse(text, NumberStyles::Float, CultureInfo::InvariantCulture, value)
+				|| Double::IsNaN(value) || Double::IsInfinity(value))
+				throw CurrencyException(fieldName + " РјР°С” Р±СѓС‚Рё С‡РёСЃР»РѕРј");
+			return value;
+		}
+
+		// Р—С‡РёС‚СѓРІР°РЅРЅСЏ С†С–Р»РѕРіРѕ С‡РёСЃР»Р° Р· РїРѕР»СЏ
+		int ReadInt(TextBox^ box, const std::string& fieldName)
+		{
+			int value;
+			if (!Int32::TryParse(box->Text->Trim(), NumberStyles::Integer, CultureInfo::InvariantCulture, value))
+				throw CurrencyException(fieldName + " РјР°С” Р±СѓС‚Рё С†С–Р»РёРј С‡РёСЃР»РѕРј");
+			return value;
+		}
+
+		//РћР±СЂРѕР±РЅРёРєРё РїРѕРґС–Р№
+
+		// РџСЂР°РІР° РєРЅРѕРїРєР° РјРёС€С– РІРёРґС–Р»СЏС” СЂСЏРґРѕРє РїС–Рґ РєСѓСЂСЃРѕСЂРѕРј (РґР»СЏ РєРѕРЅС‚РµРєСЃС‚РЅРѕРіРѕ РјРµРЅСЋ)
+		void OnGridCellMouseDown(Object^ sender, DataGridViewCellMouseEventArgs^ e)
+		{
+			if (e->Button == System::Windows::Forms::MouseButtons::Right && e->RowIndex >= 0)
+				grid->CurrentCell = grid->Rows[e->RowIndex]->Cells[0];
+		}
+
+		void OnAddCurrency(Object^ sender, EventArgs^ e)
+		{
+			try
+			{
+				RequireText(txtName, "РќР°Р·РІР° РІР°Р»СЋС‚Рё РЅРµ РјРѕР¶Рµ Р±СѓС‚Рё РїРѕСЂРѕР¶РЅСЊРѕСЋ");
+				RequireText(txtCountry, "РљСЂР°С—РЅР° РЅРµ РјРѕР¶Рµ Р±СѓС‚Рё РїРѕСЂРѕР¶РЅСЊРѕСЋ");
+				double rate = ReadDouble(txtRate, "РљСѓСЂСЃ");
+				int ratio = ReadInt(txtRatio, "Р’С–РґРЅРѕС€РµРЅРЅСЏ РґРѕ РґРѕР»Р°СЂР°");
+
+				Currency currency(ToStd(txtName->Text->Trim()), ToStd(txtCountry->Text->Trim()), rate, ratio);
+				catalog->AddCurrency(currency);
+				RefreshGrid(catalog->GetAll());
+				SelectByName(currency.GetName());
+				SetStatus(String::Concat(L"Р’Р°Р»СЋС‚Сѓ РґРѕРґР°РЅРѕ: ", ToNet(currency.GetName())));
+
+				txtName->Clear();
+				txtCountry->Clear();
+				txtRate->Clear();
+				txtRatio->Clear();
+				txtName->Focus();
 			}
-			try {
-				WideString warnings;
-				int loaded = CurrencyFileService::LoadFromFile(StringBridge::ToWide(dialog->FileName), *repository, warnings);
-				ShowAll();
-				SetStatus(System::String::Format(L"Завантажено валют: {0}", loaded));
-				if (!warnings.IsEmpty()) {
-					MessageBox::Show(StringBridge::ToManaged(warnings), L"Деякі записи пропущено",
-						MessageBoxButtons::OK, MessageBoxIcon::Warning);
+			catch (CurrencyException& ex)
+			{
+				ShowError(ex);
+			}
+		}
+
+		void OnRemoveCurrency(Object^ sender, EventArgs^ e)
+		{
+			try
+			{
+				std::string name = SelectedName();
+				if (MessageBox::Show(String::Concat(L"Р’РёРґР°Р»РёС‚Рё РІР°Р»СЋС‚Сѓ В«", ToNet(name), L"В»?"), L"РџС–РґС‚РІРµСЂРґР¶РµРЅРЅСЏ",
+					MessageBoxButtons::YesNo, MessageBoxIcon::Question) != System::Windows::Forms::DialogResult::Yes)
+					return;
+				catalog->RemoveCurrency(name);
+				RefreshGrid(catalog->GetAll());
+				SetStatus(L"Р’Р°Р»СЋС‚Сѓ РІРёРґР°Р»РµРЅРѕ");
+			}
+			catch (CurrencyException& ex)
+			{
+				ShowError(ex);
+			}
+		}
+
+		void OnSearch(Object^ sender, EventArgs^ e)
+		{
+			try
+			{
+				std::vector<Currency> found = catalog->SearchByName(ToStd(txtSearch->Text->Trim()));
+				RefreshGrid(found);
+				SetStatus(String::Format(L"Р—РЅР°Р№РґРµРЅРѕ РІР°Р»СЋС‚: {0}", static_cast<int>(found.size())));
+			}
+			catch (CurrencyException& ex)
+			{
+				ShowError(ex);
+			}
+		}
+
+		void OnFilterByRate(Object^ sender, EventArgs^ e)
+		{
+			try
+			{
+				double from = ReadDouble(txtFrom, "РќРёР¶РЅСЏ РјРµР¶Р° РєСѓСЂСЃСѓ");
+				double to = ReadDouble(txtTo, "Р’РµСЂС…РЅСЏ РјРµР¶Р° РєСѓСЂСЃСѓ");
+				std::vector<Currency> found = catalog->FilterByRate(from, to);
+				RefreshGrid(found);
+				SetStatus(String::Format(L"Р’Р°Р»СЋС‚ Р· РєСѓСЂСЃРѕРј Сѓ С†СЊРѕРјСѓ РґС–Р°РїР°Р·РѕРЅС–: {0}", static_cast<int>(found.size())));
+			}
+			catch (CurrencyException& ex)
+			{
+				ShowError(ex);
+			}
+		}
+
+		void OnShowAll(Object^ sender, EventArgs^ e)
+		{
+			RefreshGrid(catalog->GetAll());
+			SetStatus(String::Format(L"РЈСЃСЊРѕРіРѕ РІР°Р»СЋС‚: {0}", catalog->Count()));
+		}
+
+		void OnAddBanknotes(Object^ sender, EventArgs^ e)
+		{
+			try
+			{
+				std::string name = SelectedName();
+				int denomination = ReadInt(txtDenomination, "РќРѕРјС–РЅР°Р»");
+				int quantity = ReadInt(txtQuantity, "РљС–Р»СЊРєС–СЃС‚СЊ");
+				catalog->AddBanknotes(name, denomination, quantity);
+				RefreshGrid(catalog->GetAll());
+				SelectByName(name);
+				SetStatus(L"Р‘Р°РЅРєРЅРѕС‚Рё РґРѕРґР°РЅРѕ");
+			}
+			catch (CurrencyException& ex)
+			{
+				ShowError(ex);
+			}
+		}
+
+		void OnRemoveBanknotes(Object^ sender, EventArgs^ e)
+		{
+			try
+			{
+				std::string name = SelectedName();
+				int denomination = ReadInt(txtDenomination, "РќРѕРјС–РЅР°Р»");
+				int quantity = ReadInt(txtQuantity, "РљС–Р»СЊРєС–СЃС‚СЊ");
+				catalog->RemoveBanknotes(name, denomination, quantity);
+				RefreshGrid(catalog->GetAll());
+				SelectByName(name);
+				SetStatus(L"Р‘Р°РЅРєРЅРѕС‚Рё РІРёР»СѓС‡РµРЅРѕ");
+			}
+			catch (CurrencyException& ex)
+			{
+				ShowError(ex);
+			}
+		}
+
+		void OnSort(Object^ sender, EventArgs^ e)
+		{
+			try
+			{
+				catalog->SortByDollarRatio();
+				RefreshGrid(catalog->GetAll());
+				SetStatus(L"Р’С–РґСЃРѕСЂС‚РѕРІР°РЅРѕ Р·Р° РІС–РґРЅРѕС€РµРЅРЅСЏРј РґРѕ РґРѕР»Р°СЂР° (РјРµС‚РѕРґ РїС–РґСЂР°С…СѓРЅРєСѓ)");
+			}
+			catch (CurrencyException& ex)
+			{
+				ShowError(ex);
+			}
+		}
+
+		void OnReportCountries(Object^ sender, EventArgs^ e)
+		{
+			try
+			{
+				txtReport->Text = ToNet(catalog->BuildCountryReport());
+				SetStatus(L"РЎС„РѕСЂРјРѕРІР°РЅРѕ СЃРїРёСЃРѕРє РІР°Р»СЋС‚ Р·Р° РєСЂР°С—РЅР°РјРё");
+			}
+			catch (CurrencyException& ex)
+			{
+				ShowError(ex);
+			}
+		}
+
+		void OnReportDollars(Object^ sender, EventArgs^ e)
+		{
+			try
+			{
+				txtReport->Text = ToNet(catalog->BuildDollarReport());
+				SetStatus(L"Р‘Р°РЅРєРЅРѕС‚Рё РїРµСЂРµРІРµРґРµРЅРѕ РІ РґРѕР»Р°СЂРё");
+			}
+			catch (CurrencyException& ex)
+			{
+				ShowError(ex);
+			}
+		}
+
+		void OnShowChart(Object^ sender, EventArgs^ e)
+		{
+			try
+			{
+				std::map<std::string, double> totals = catalog->TotalsInDollarsByCountry();
+				cli::array<String^>^ names = gcnew cli::array<String^>(static_cast<int>(totals.size()));
+				cli::array<double>^ values = gcnew cli::array<double>(static_cast<int>(totals.size()));
+				int i = 0;
+				for (const auto& item : totals)
+				{
+					names[i] = ToNet(item.first);
+					values[i] = item.second;
+					i++;
 				}
+				ChartForm^ chart = gcnew ChartForm(names, values);
+				chart->ShowDialog(this);
 			}
-			catch (FileAccessException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (CurrencyException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (System::Exception^ ex) {
-				ShowError(L"Непередбачена помилка: " + ex->Message);
+			catch (CurrencyException& ex)
+			{
+				ShowError(ex);
 			}
 		}
 
-		System::Void OnSaveFile(System::Object^ sender, System::EventArgs^ e) {
-			SaveFileDialog^ dialog = gcnew SaveFileDialog();
-			dialog->Title = L"Зберегти валюти у файл";
-			dialog->Filter = L"Текстові файли (*.txt)|*.txt|Усі файли (*.*)|*.*";
-			dialog->DefaultExt = L"txt";
-			if (dialog->ShowDialog() != System::Windows::Forms::DialogResult::OK) {
+		void OnOpenFile(Object^ sender, EventArgs^ e)
+		{
+			try
+			{
+				OpenFileDialog^ dialog = gcnew OpenFileDialog();
+				dialog->Title = L"Р’С–РґРєСЂРёС‚Рё С„Р°Р№Р» Р· РІР°Р»СЋС‚Р°РјРё";
+				dialog->Filter = L"РўРµРєСЃС‚РѕРІС– С„Р°Р№Р»Рё (*.txt)|*.txt|РЈСЃС– С„Р°Р№Р»Рё (*.*)|*.*";
+				if (dialog->ShowDialog() != System::Windows::Forms::DialogResult::OK)
+					return;
+				catalog->LoadFromFile(ToStd(dialog->FileName));
+				RefreshGrid(catalog->GetAll());
+				txtReport->Clear();
+				SetStatus(String::Format(L"Р—Р°РІР°РЅС‚Р°Р¶РµРЅРѕ РІР°Р»СЋС‚: {0}", catalog->Count()));
+			}
+			catch (CurrencyException& ex)
+			{
+				ShowError(ex);
+			}
+		}
+
+		void OnSaveFile(Object^ sender, EventArgs^ e)
+		{
+			try
+			{
+				if (catalog->Count() == 0)
+					throw CurrencyException("РЎРїРёСЃРѕРє РІР°Р»СЋС‚ РїРѕСЂРѕР¶РЅС–Р№ - РЅС–С‡РѕРіРѕ Р·Р±РµСЂС–РіР°С‚Рё");
+				SaveFileDialog^ dialog = gcnew SaveFileDialog();
+				dialog->Title = L"Р—Р±РµСЂРµРіС‚Рё РІР°Р»СЋС‚Рё Сѓ С„Р°Р№Р»";
+				dialog->Filter = L"РўРµРєСЃС‚РѕРІС– С„Р°Р№Р»Рё (*.txt)|*.txt";
+				dialog->DefaultExt = L"txt";
+				if (dialog->ShowDialog() != System::Windows::Forms::DialogResult::OK)
+					return;
+				catalog->SaveToFile(ToStd(dialog->FileName));
+				SetStatus(String::Format(L"Р—Р±РµСЂРµР¶РµРЅРѕ РІР°Р»СЋС‚: {0}", catalog->Count()));
+			}
+			catch (CurrencyException& ex)
+			{
+				ShowError(ex);
+			}
+		}
+
+		void OnClearAll(Object^ sender, EventArgs^ e)
+		{
+			if (MessageBox::Show(L"Р’РёРґР°Р»РёС‚Рё РІСЃС– РІР°Р»СЋС‚Рё Р·С– СЃРїРёСЃРєСѓ?", L"РџС–РґС‚РІРµСЂРґР¶РµРЅРЅСЏ",
+				MessageBoxButtons::YesNo, MessageBoxIcon::Question) != System::Windows::Forms::DialogResult::Yes)
 				return;
-			}
-			try {
-				CurrencyFileService::SaveToFile(StringBridge::ToWide(dialog->FileName), *repository);
-				SetStatus(L"Дані збережено у файл");
-			}
-			catch (FileAccessException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (CurrencyException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (System::Exception^ ex) {
-				ShowError(L"Непередбачена помилка: " + ex->Message);
-			}
+			catalog->Clear();
+			RefreshGrid(catalog->GetAll());
+			txtReport->Clear();
+			SetStatus(L"РЎРїРёСЃРѕРє РѕС‡РёС‰РµРЅРѕ");
 		}
 
-		System::Void OnExit(System::Object^ sender, System::EventArgs^ e) {
+		void OnExit(Object^ sender, EventArgs^ e)
+		{
 			this->Close();
 		}
 
-		System::Void OnAddCurrency(System::Object^ sender, System::EventArgs^ e) {
-			try {
-				Currency currency(
-					StringBridge::ToWide(txtName->Text),
-					StringBridge::ToWide(txtCountry->Text),
-					ValueParser::ParseDouble(StringBridge::ToWide(txtRate->Text), L"Курс"),
-					ValueParser::ParseDouble(StringBridge::ToWide(txtDollar->Text), L"Відношення до долара"),
-					ValueParser::ParseBanknotes(StringBridge::ToWide(txtNotes->Text)));
-				repository->Add(static_cast<Currency&&>(currency));
-				ShowAll();
-				ClearInputFields();
-				SetStatus(L"Валюту додано");
-			}
-			catch (DuplicateItemException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (InvalidFormatException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (InvalidValueException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (NumberOverflowException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (CurrencyException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (System::Exception^ ex) {
-				ShowError(L"Непередбачена помилка: " + ex->Message);
-			}
-		}
-
-		System::Void OnRemoveCurrency(System::Object^ sender, System::EventArgs^ e) {
-			try {
-				int index = shown->At(GetSelectedRow());
-				System::String^ title = StringBridge::ToManaged(repository->GetAt(index).ToString());
-				if (MessageBox::Show(L"Видалити валюту «" + title + L"»?", L"Підтвердження",
-					MessageBoxButtons::YesNo, MessageBoxIcon::Question) != System::Windows::Forms::DialogResult::Yes) {
-					return;
-				}
-				repository->RemoveAt(index);
-				ShowAll();
-				SetStatus(L"Валюту видалено");
-			}
-			catch (ItemNotFoundException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (IndexRangeException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (CurrencyException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (System::Exception^ ex) {
-				ShowError(L"Непередбачена помилка: " + ex->Message);
-			}
-		}
-
-		System::Void OnSearch(System::Object^ sender, System::EventArgs^ e) {
-			try {
-				DynamicArray<int> found;
-				repository->SearchByName(StringBridge::ToWide(txtSearch->Text), found);
-				int count = found.Count();
-				ShowIndices(found, System::String::Format(L"Знайдено валют: {0}", count));
-			}
-			catch (InvalidValueException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (CurrencyException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (System::Exception^ ex) {
-				ShowError(L"Непередбачена помилка: " + ex->Message);
-			}
-		}
-
-		System::Void OnFilterByRate(System::Object^ sender, System::EventArgs^ e) {
-			try {
-				double minRate = ValueParser::ParseDouble(StringBridge::ToWide(txtFrom->Text), L"Курс від");
-				double maxRate = ValueParser::ParseDouble(StringBridge::ToWide(txtTo->Text), L"Курс до");
-				DynamicArray<int> found;
-				repository->FilterByRate(minRate, maxRate, found);
-				int count = found.Count();
-				ShowIndices(found, System::String::Format(L"Валют з курсом у заданому діапазоні: {0}", count));
-			}
-			catch (InvalidFormatException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (InvalidValueException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (CurrencyException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (System::Exception^ ex) {
-				ShowError(L"Непередбачена помилка: " + ex->Message);
-			}
-		}
-
-		System::Void OnShowAll(System::Object^ sender, System::EventArgs^ e) {
-			ShowAll();
-		}
-
-		System::Void OnAddNotes(System::Object^ sender, System::EventArgs^ e) {
-			try {
-				int row = GetSelectedRow();
-				int index = shown->At(row);
-				int denomination = ValueParser::ParseInteger(StringBridge::ToWide(txtDenomination->Text), L"Номінал");
-				int quantity = ValueParser::ParseInteger(StringBridge::ToWide(txtQuantity->Text), L"Кількість");
-				repository->GetAt(index).GetBanknotes().Add(denomination, quantity);
-				RefillGrid(L"Банкноти додано");
-				RestoreSelection(row);
-			}
-			catch (ItemNotFoundException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (InvalidFormatException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (NumberOverflowException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (CurrencyException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (System::Exception^ ex) {
-				ShowError(L"Непередбачена помилка: " + ex->Message);
-			}
-		}
-
-		System::Void OnRemoveNotes(System::Object^ sender, System::EventArgs^ e) {
-			try {
-				int row = GetSelectedRow();
-				int index = shown->At(row);
-				int denomination = ValueParser::ParseInteger(StringBridge::ToWide(txtDenomination->Text), L"Номінал");
-				int quantity = ValueParser::ParseInteger(StringBridge::ToWide(txtQuantity->Text), L"Кількість");
-				repository->GetAt(index).GetBanknotes().Remove(denomination, quantity);
-				RefillGrid(L"Банкноти вилучено");
-				RestoreSelection(row);
-			}
-			catch (NotEnoughBanknotesException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (ItemNotFoundException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (InvalidFormatException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (CurrencyException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (System::Exception^ ex) {
-				ShowError(L"Непередбачена помилка: " + ex->Message);
-			}
-		}
-
-		System::Void OnSortByDollar(System::Object^ sender, System::EventArgs^ e) {
-			try {
-				CurrencySorter::SortByDollarRateCounting(*repository, chkDescending->Checked);
-				ShowAll();
-				SetStatus(L"Відсортовано підрахунком за відношенням до долара");
-			}
-			catch (MemoryAllocationException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (NumberOverflowException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (CurrencyException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (System::Exception^ ex) {
-				ShowError(L"Непередбачена помилка: " + ex->Message);
-			}
-		}
-
-		System::Void OnReportCountries(System::Object^ sender, System::EventArgs^ e) {
-			try {
-				txtReport->Text = StringBridge::ToManaged(CurrencyReportBuilder::BuildBanknoteReportByCountry(*repository));
-				tabs->SelectedTab = tabReports;
-			}
-			catch (CurrencyException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (System::Exception^ ex) {
-				ShowError(L"Непередбачена помилка: " + ex->Message);
-			}
-		}
-
-		System::Void OnReportDollars(System::Object^ sender, System::EventArgs^ e) {
-			try {
-				txtReport->Text = StringBridge::ToManaged(CurrencyReportBuilder::BuildDollarTotalsByCountry(*repository));
-				tabs->SelectedTab = tabReports;
-			}
-			catch (NumberOverflowException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (CurrencyException& ex) {
-				ShowNativeError(ex);
-			}
-			catch (System::Exception^ ex) {
-				ShowError(L"Непередбачена помилка: " + ex->Message);
-			}
-		}
-
-		System::Void OnFileFormatHelp(System::Object^ sender, System::EventArgs^ e) {
-			System::String^ text =
-				L"Файл — текстовий, кодування UTF-8.\r\n"
-				L"Один запис = один рядок. Поля розділені символом '|':\r\n\r\n"
-				L"Назва|Країна|Курс|Відношення до долара|Номінал:Кількість;Номінал:Кількість\r\n\r\n"
-				L"• Курс — вартість 1 одиниці в національній валюті країни.\r\n"
-				L"• Відношення до долара — скільки доларів за 1 одиницю валюти.\r\n"
-				L"• Дробові числа записуються через крапку (допускається й кома).\r\n"
-				L"• Банкноти: пари «номінал:кількість» через ';' (можна залишити порожнім).\r\n"
-				L"• Рядки, що починаються з '#', та порожні рядки ігноруються.\r\n\r\n"
-				L"Приклад:\r\n"
-				L"Євро|Польща|4.3|1.09|10:30;20:20;100:5";
-			MessageBox::Show(text, L"Формат файлу даних", MessageBoxButtons::OK, MessageBoxIcon::Information);
-		}
-
-		System::Void OnAbout(System::Object^ sender, System::EventArgs^ e) {
+		void OnFileFormat(Object^ sender, EventArgs^ e)
+		{
 			MessageBox::Show(
-				L"Облік валют\r\nC++/CLI, Windows Forms (.NET Framework), модель без STL.",
-				L"Про програму", MessageBoxButtons::OK, MessageBoxIcon::Information);
+				L"РўРµРєСЃС‚РѕРІРёР№ С„Р°Р№Р» Сѓ РєРѕРґСѓРІР°РЅРЅС– ANSI (Windows-1251). РћРґРёРЅ СЂСЏРґРѕРє - РѕРґРЅР° РІР°Р»СЋС‚Р°:\n\n"
+				L"РЅР°Р·РІР°;РєСЂР°С—РЅР°;РєСѓСЂСЃ;РІС–РґРЅРѕС€РµРЅРЅСЏ;РЅРѕРјС–РЅР°Р»:РєС–Р»СЊРєС–СЃС‚СЊ РЅРѕРјС–РЅР°Р»:РєС–Р»СЊРєС–СЃС‚СЊ\n\n"
+				L"РџСЂРёРєР»Р°Рґ:\nР„РІСЂРѕ;РќС–РјРµС‡С‡РёРЅР°;1.08;1;5:10 20:5 100:3\n\n"
+				L"- РєСѓСЂСЃ: СЃРєС–Р»СЊРєРё РґРѕР»Р°СЂС–РІ РєРѕС€С‚СѓС” 1 РѕРґРёРЅРёС†СЏ РІР°Р»СЋС‚Рё (РєСЂР°РїРєР° СЏРє СЂРѕР·РґС–Р»СЊРЅРёРє);\n"
+				L"- РІС–РґРЅРѕС€РµРЅРЅСЏ: СЃРєС–Р»СЊРєРё РѕРґРёРЅРёС†СЊ РІР°Р»СЋС‚Рё Р·Р° 1 РґРѕР»Р°СЂ (С†С–Р»Рµ С‡РёСЃР»Рѕ);\n"
+				L"- Р±Р°РЅРєРЅРѕС‚Рё: РїР°СЂРё РЅРѕРјС–РЅР°Р»:РєС–Р»СЊРєС–СЃС‚СЊ С‡РµСЂРµР· РїСЂРѕР±С–Р» (РјРѕР¶СѓС‚СЊ Р±СѓС‚Рё РІС–РґСЃСѓС‚РЅС–).",
+				L"Р¤РѕСЂРјР°С‚ С„Р°Р№Р»Сѓ РґР°РЅРёС…", MessageBoxButtons::OK, MessageBoxIcon::Information);
 		}
-	};
+
+		void OnAbout(Object^ sender, EventArgs^ e)
+		{
+			MessageBox::Show(
+				L"РћР±Р»С–Рє РІР°Р»СЋС‚\nРљСѓСЂСЃРѕРІР° СЂРѕР±РѕС‚Р° Р· РґРёСЃС†РёРїР»С–РЅРё В«РћР±'С”РєС‚РЅРѕ-РѕСЂС–С”РЅС‚РѕРІР°РЅРµ РїСЂРѕРіСЂР°РјСѓРІР°РЅРЅСЏВ»\n"
+				L"C++/CLI, Windows Forms",
+				L"РџСЂРѕ РїСЂРѕРіСЂР°РјСѓ", MessageBoxButtons::OK, MessageBoxIcon::Information);
+		}
+	private: System::Void toolTip_Popup(System::Object^ sender, System::Windows::Forms::PopupEventArgs^ e) {
+	}
+};
 }
